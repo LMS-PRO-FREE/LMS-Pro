@@ -663,6 +663,21 @@ body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); min-height
         .profile-menu-item:hover { background: var(--hover-color); color: var(--primary); }
         .profile-menu-divider { border-top: 1px solid var(--border-color); margin: 8px 0; }
 
+
+        /* Responsive Overrides */
+        html, body { overflow-x: hidden; width: 100%; max-width: 100vw; }
+        .dashboard-layout, .admin-layout { width: 100%; display: flex; flex-direction: column; min-height: 100vh; }
+        @media (min-width: 768px) {
+            .dashboard-layout, .admin-layout { flex-direction: row; }
+        }
+        .main-content { flex: 1; width: 100%; min-width: 0; }
+        .glass-panel { width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+        .chat-window { max-width: 90vw !important; }
+        img.avatar-preview { width: 100%; height: 100%; object-fit: cover; }
+        /* Avatar Crop Tool */
+        #avatar-crop-container { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:none; justify-content:center; align-items:center; flex-direction:column; }
+        #avatar-canvas { border-radius: 50%; box-shadow: 0 0 0 2000px rgba(0,0,0,0.5); }
+
 </style>
     <style>
         /* ===== TOAST NOTIFICATIONS ===== */
@@ -3455,7 +3470,7 @@ body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); min-height
                     <div id="chat-main-view" style="display:flex; flex-direction:column; height:100%;">
                         <div class="chat-header">
                             <span>💬 Tin nhắn & Kết bạn</span>
-                            <button onclick="toggleChat()" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
+                            <button onclick="openFullChat()" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
                         </div>
                         <div class="chat-tabs">
                             <div class="chat-tab active" onclick="switchChatTab('recent', this)">Gần đây</div>
@@ -3479,7 +3494,7 @@ body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); min-height
                         </div>
                     </div>
                 </div>
-                <div id="chat-bubble" onclick="toggleChat()">
+                <div id="chat-bubble" onclick="openFullChat()">
                     💬
                     <span id="chat-badge">0</span>
                 </div>
@@ -3780,7 +3795,7 @@ setTimeout(optimizeMobileNavbar, 100);
                 <span style="font-weight:700; font-size:14px; color:var(--text-color);">🎵 Lofi Chill Beats</span>
                 <button onclick="document.getElementById('lofiPlayer').classList.add('hidden')" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-weight:800;">✕</button>
             </div>
-            <iframe width="100%" height="120" src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1" title="Lofi Girl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius:10px;"></iframe>
+            <iframe width="100%" height="120" src="https://www.youtube.com/embed/videoseries?list=PL2I-mf8ZuifUChsAsbxxrbam0skUSJcBa&enablejsapi=1" title="Lofi Girl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius:10px;"></iframe>
             <p style="font-size:11px; color:#94a3b8; margin-top:8px; text-align:center;">Bật nhạc để làm việc tập trung hơn!</p>
         </div>
         <button id="lofiBtn" onclick="document.getElementById('lofiPlayer').classList.toggle('hidden')" style="width: 50px; height: 50px; border-radius: 50%; background: #8b5cf6; color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 10px 20px rgba(139,92,246,0.3); transition: all 0.3s ease; display: flex; justify-content: center; align-items: center;" title="Bật nhạc nền">
@@ -3801,6 +3816,17 @@ window.fetch = async function(url, options) {
     if (url === ORIGINAL_SCRIPT_URL && options && options.method === 'POST') {
         const req = JSON.parse(options.body);
         const action = req.action;
+
+        const formatDate = (ds) => {
+            if(!ds) return "";
+            try {
+                if(ds.includes('/')) return ds; // already dd/mm/yyyy
+                const d = new Date(ds);
+                if(isNaN(d.getTime())) return ds;
+                return d.getDate().toString().padStart(2,'0') + '/' + (d.getMonth()+1).toString().padStart(2,'0') + '/' + d.getFullYear();
+            } catch(e) { return ds; }
+        };
+
         
         const getOnce = async (path) => {
             const snap = await db.ref(path).once('value');
@@ -3839,7 +3865,7 @@ window.fetch = async function(url, options) {
                 const tk = (req.tk || "").toLowerCase();
                 const user = users.find(u => (u['Tài khoảng'] || "").toLowerCase() === tk);
                 if (user) {
-                    result = { status: "success", data: { name: user['Họ và Tên']||"", sdt: user['Số điện thoại']||"", email: user['Email']||"", ngaysinh: user['Ngày sinh']||"" } };
+                    result = { status: "success", data: { name: user['Họ và Tên']||"", sdt: user['Số điện thoại']||"", email: user['Email']||"", ngaysinh: formatDate(user['Ngày sinh']||"") } };
                 } else {
                     result = { status: "error", message: "Lỗi hệ thống khi tải hồ sơ!" };
                 }
@@ -3868,7 +3894,7 @@ window.fetch = async function(url, options) {
                 const mapped = users.map(u => ({
                     name: u['Họ và Tên'], tk: u['Tài khoảng'], password: u['Mật khẩu'], role: u['Quyền hạn (student, teacher, admin)']||'student',
                     exp: u['Hạn dùng (Định dạng DD_MM_YYYY hoặc permanent)']||'permanent', sdt: u['Số điện thoại'], email: u['Email'],
-                    maso: u['Giấy tờ định danh (Số CCCD hoặc số MSSV)'], ngaysinh: u['Ngày sinh'], khoahoc: u['Khóa học _ Mã lớp'],
+                    maso: u['Giấy tờ định danh (Số CCCD hoặc số MSSV)'], ngaysinh: formatDate(u['Ngày sinh']), khoahoc: u['Khóa học _ Mã lớp'],
                     truongDH: u['Tên trường'], hanTheSV: u['Hạn thẻ SV'], status: u['Trạng thái (active, pending, suspended, banned, expired)']||'active',
                     reason: u['Lý do (Dùng để ghi chú khi khóa, mở khóa, hoặc gia hạn)'], adminName: u['Admin xử lý (Tên hoặc tài khoản Admin thực hiện thao tác)']
                 }));
@@ -3996,6 +4022,200 @@ window.fetch = async function(url, options) {
     }
     return oldFetch(url, options);
 };
+</script>
+
+
+    <!-- PROFILE FULL PAGE -->
+    <div id="profile-page-view" class="hidden main-content" style="padding: 30px; padding-top: 100px; width:100%; box-sizing:border-box;">
+        <div class="glass-panel" style="max-width: 800px; margin: 0 auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; background:linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">Thông Tin Cá Nhân</h2>
+                <button onclick="document.getElementById('profile-page-view').classList.add('hidden'); document.getElementById(sessionStorage.getItem('originalRole') === 'admin' ? 'admin-view' : (sessionStorage.getItem('originalRole') === 'teacher' ? 'teacher-view' : 'student-view')).classList.remove('hidden');" style="padding:8px 16px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:8px; cursor:pointer;">⬅ Quay lại</button>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 30px;">
+                <div style="position:relative; width:120px; height:120px; border-radius:50%; background:var(--primary); display:flex; justify-content:center; align-items:center; cursor:pointer; overflow:hidden;" onclick="document.getElementById('avatar-upload').click()">
+                    <img id="profile-avatar-img" src="" style="display:none;" class="avatar-preview">
+                    <span id="profile-avatar-initials" style="font-size:40px; color:white; font-weight:bold;">A</span>
+                    <div style="position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.5); color:white; font-size:12px; text-align:center; padding:4px 0;">Sửa</div>
+                </div>
+                <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarSelect(event)">
+                <h3 id="profile-full-name" style="margin-top:15px; font-size:24px;">Đang tải...</h3>
+                <p id="profile-full-role" style="color:var(--primary); font-weight:600;">Role</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="form-group"><label>Tài khoản / ID</label><input type="text" id="prof-tk" readonly class="form-control"></div>
+                <div class="form-group"><label>Email</label><input type="text" id="prof-email" readonly class="form-control"></div>
+                <div class="form-group"><label>Số điện thoại</label><input type="text" id="prof-sdt" readonly class="form-control"></div>
+                <div class="form-group"><label>Ngày sinh</label><input type="text" id="prof-dob" readonly class="form-control"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FULL CHAT INTERFACE -->
+    <div id="full-chat-view" class="hidden main-content" style="padding: 30px; padding-top: 100px; width:100%; box-sizing:border-box; height: 100vh;">
+        <div class="glass-panel" style="height: calc(100vh - 130px); padding:0; display:flex; overflow:hidden;">
+            <!-- Left Sidebar -->
+            <div style="width: 300px; border-right: 1px solid var(--glass-border); display:flex; flex-direction:column;">
+                <div style="padding: 20px; border-bottom: 1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0;">Trò chuyện</h3>
+                    <button onclick="document.getElementById('full-chat-view').classList.add('hidden'); document.getElementById(sessionStorage.getItem('originalRole') === 'admin' ? 'admin-view' : (sessionStorage.getItem('originalRole') === 'teacher' ? 'teacher-view' : 'student-view')).classList.remove('hidden');" style="background:transparent; border:none; cursor:pointer;">✕</button>
+                </div>
+                <div style="display:flex; border-bottom: 1px solid var(--glass-border);">
+                    <button class="chat-tab active" style="flex:1; border-radius:0;" onclick="switchFullChatTab('recent')">Gần đây</button>
+                    <button class="chat-tab" style="flex:1; border-radius:0;" onclick="switchFullChatTab('friends')">Bạn bè</button>
+                    <button class="chat-tab" style="flex:1; border-radius:0;" onclick="switchFullChatTab('requests')">Lời mời</button>
+                </div>
+                <div id="full-chat-sidebar-content" style="flex:1; overflow-y:auto;"></div>
+            </div>
+            <!-- Right Content -->
+            <div id="full-chat-main-area" style="flex:1; background: var(--bg-color); display:flex; justify-content:center; align-items:center; flex-direction:column;">
+                <div style="font-size:50px; margin-bottom:20px;">💬</div>
+                <h3 style="color:var(--text-color);">Chọn một cuộc trò chuyện</h3>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AVATAR CROPPER -->
+    <div id="avatar-crop-container">
+        <h3 style="color:white; margin-bottom:20px;">Cắt ảnh đại diện (Kéo để điều chỉnh)</h3>
+        <div style="position:relative; width: 300px; height: 300px; background:#fff; overflow:hidden;">
+            <img id="avatar-crop-img" style="position:absolute; cursor:move;" draggable="false">
+        </div>
+        <div style="margin-top:20px; display:flex; gap:15px;">
+            <button onclick="document.getElementById('avatar-crop-container').style.display='none'" style="padding:10px 20px; background:#64748b; color:white; border:none; border-radius:8px; cursor:pointer;">Hủy</button>
+            <button onclick="saveAvatar()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">Lưu thay đổi</button>
+        </div>
+    </div>
+
+
+<script>
+    // Navigation to Profile Page
+    function openFullProfile() {
+        hideAllViews();
+        document.getElementById('profile-page-view').classList.remove('hidden');
+        const tk = sessionStorage.getItem('loggedInTk');
+        const role = sessionStorage.getItem('originalRole');
+        document.getElementById('prof-tk').value = tk;
+        document.getElementById('profile-full-role').innerText = role === 'admin' ? 'Quản trị viên' : (role === 'teacher' ? 'Giáo viên' : 'Học sinh');
+        
+        // Fetch Profile from Firebase
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "getProfile", tk: tk }) })
+            .then(r=>r.json())
+            .then(res => {
+                if(res.status === 'success') {
+                    document.getElementById('profile-full-name').innerText = res.data.name;
+                    document.getElementById('prof-email').value = res.data.email;
+                    document.getElementById('prof-sdt').value = res.data.sdt;
+                    document.getElementById('prof-dob').value = res.data.ngaysinh;
+                }
+            });
+            
+        // Load Avatar
+        db.ref('avatars/' + tk).once('value', snap => {
+            const b64 = snap.val();
+            if(b64) {
+                document.getElementById('profile-avatar-img').src = b64;
+                document.getElementById('profile-avatar-img').style.display = 'block';
+                document.getElementById('profile-avatar-initials').style.display = 'none';
+            }
+        });
+    }
+
+    // Replace old profile open logic
+    document.querySelectorAll('.avatar-circle').forEach(el => {
+        el.onclick = openFullProfile;
+    });
+
+    // Avatar Cropping Logic
+    let cropStartX = 0, cropStartY = 0, imgX = 0, imgY = 0;
+    let isDraggingCrop = false;
+    
+    function handleAvatarSelect(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            document.getElementById('avatar-crop-container').style.display = 'flex';
+            const img = document.getElementById('avatar-crop-img');
+            img.src = event.target.result;
+            img.onload = () => {
+                // scale to fit shortest side to 300px
+                const ratio = img.naturalWidth / img.naturalHeight;
+                if(ratio > 1) { img.style.height = '300px'; img.style.width = (300*ratio)+'px'; }
+                else { img.style.width = '300px'; img.style.height = (300/ratio)+'px'; }
+                img.style.left = '0px'; img.style.top = '0px'; imgX = 0; imgY = 0;
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    document.getElementById('avatar-crop-img').addEventListener('mousedown', (e) => {
+        isDraggingCrop = true; cropStartX = e.clientX - imgX; cropStartY = e.clientY - imgY;
+    });
+    window.addEventListener('mousemove', (e) => {
+        if(!isDraggingCrop) return;
+        imgX = e.clientX - cropStartX; imgY = e.clientY - cropStartY;
+        // bounds checking
+        const img = document.getElementById('avatar-crop-img');
+        const minX = 300 - parseInt(img.style.width);
+        const minY = 300 - parseInt(img.style.height);
+        if(imgX > 0) imgX = 0; if(imgY > 0) imgY = 0;
+        if(imgX < minX) imgX = minX; if(imgY < minY) imgY = minY;
+        img.style.left = imgX + 'px'; img.style.top = imgY + 'px';
+    });
+    window.addEventListener('mouseup', () => isDraggingCrop = false);
+    
+    function saveAvatar() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300; canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        const img = document.getElementById('avatar-crop-img');
+        // draw full image offset by imgX, imgY
+        ctx.drawImage(img, imgX, imgY, parseInt(img.style.width), parseInt(img.style.height));
+        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        
+        const tk = sessionStorage.getItem('loggedInTk');
+        db.ref('avatars/' + tk).set(b64).then(() => {
+            document.getElementById('avatar-crop-container').style.display = 'none';
+            document.getElementById('profile-avatar-img').src = b64;
+            document.getElementById('profile-avatar-img').style.display = 'block';
+            document.getElementById('profile-avatar-initials').style.display = 'none';
+            showToast('Đã cập nhật ảnh đại diện', 'success');
+        });
+    }
+    
+    function hideAllViews() {
+        document.querySelectorAll('.main-content, .admin-layout, .dashboard-layout').forEach(v => v.classList.add('hidden'));
+    }
+    
+    // Dedicated Chat Navigation
+    function openFullChat() {
+        hideAllViews();
+        document.getElementById('full-chat-view').classList.remove('hidden');
+        switchFullChatTab('recent');
+    }
+    
+    function switchFullChatTab(tab) {
+        // Implement tab switching for full chat ...
+        const content = document.getElementById('full-chat-sidebar-content');
+        if(tab === 'recent') renderRecentChats(content);
+        if(tab === 'friends') renderFriends(content);
+        if(tab === 'requests') {
+            const fr = getGlobalFriends().filter(f => f.to === sessionStorage.getItem('loggedInTk') && f.status === 'pending');
+            if(fr.length===0) { content.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;">Không có lời mời nào</div>'; return;}
+            let html='';
+            fr.forEach(f => {
+                html += `<div style="padding:15px; border-bottom:1px solid #e2e8f0;">
+                    <div><strong>${f.from}</strong></div>
+                    <button onclick="acceptFriendRequest('${f.from}')" style="background:var(--primary);color:white;border:none;padding:5px 10px;border-radius:4px;margin-top:5px;cursor:pointer;">Chấp nhận</button>
+                    <button onclick="rejectFriendRequest('${f.from}')" style="background:#ef4444;color:white;border:none;padding:5px 10px;border-radius:4px;margin-top:5px;cursor:pointer;">Từ chối</button>
+                </div>`;
+            });
+            content.innerHTML = html;
+        }
+    }
 </script>
 
 </body>
