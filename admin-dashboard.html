@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng điều khiển Admin – LMS EDU PRO</title>
+  <meta name="description" content="Quản lý hệ thống LMS EDU PRO dành cho Admin.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* ── Table Wrapper ── */
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-shadow);
+      padding: 1px;
+    }
+
+    /* ── Data Table ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+      font-size: 0.9rem;
+      border-radius: calc(var(--radius) - 1px);
+      overflow: hidden;
+    }
+    .data-table th,
+    .data-table td {
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding: 1rem;
+      text-align: left;
+      color: var(--text);
+    }
+    .data-table th {
+      background: rgba(255,255,255,0.25);
+      font-weight: 600;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+    .data-table tbody tr { transition: background var(--transition); }
+    .data-table tbody tr:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── Export / Action Buttons ── */
+    .btn-export {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.3rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition);
+      box-shadow: var(--glass-shadow);
+      font-size: 0.92rem;
+    }
+    .btn-export:hover {
+      background: rgba(255,255,255,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .btn-export.btn-primary-glass {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+    }
+    .btn-export.btn-primary-glass:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,122,255,0.4);
+    }
+
+    /* ── Inline row action buttons ── */
+    .btn-row {
+      border: none;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn-row-edit {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(0,122,255,0.3);
+    }
+    .btn-row-edit:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-row-danger {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(239,68,68,0.3);
+    }
+    .btn-row-danger:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-row-disabled {
+      background: var(--glass-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* ── Role Badge ── */
+    .role-badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .role-badge.admin   { background: rgba(0,122,255,0.14); color: var(--primary); border: 1px solid rgba(0,122,255,0.25); }
+    .role-badge.teacher { background: rgba(52,199,89,0.14); color: #1a9e44; border: 1px solid rgba(52,199,89,0.25); }
+    .role-badge.student { background: rgba(255,149,0,0.14); color: #b86e00; border: 1px solid rgba(255,149,0,0.25); }
+
+    /* ── Avatar circle in table ── */
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.88rem;
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 2px 8px rgba(0,122,255,0.25);
+      flex-shrink: 0;
+    }
+
+    /* ── Dashboard header row ── */
+    .dash-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem; }
+    .dash-header-left  { display:flex; align-items:center; gap:10px; }
+    .dash-header-right { display:flex; gap:1rem; flex-wrap:wrap; }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    .modal-panel {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      padding: 2.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.5);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.3s cubic-bezier(0.25,1,0.5,1);
+    }
+    .modal-title {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-title-danger {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-form { display:flex; flex-direction:column; gap:1.2rem; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:1rem; margin-top:1rem; }
+
+    .btn-modal-cancel {
+      padding: 0.75rem 1.5rem; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+      color: var(--text); cursor: pointer; font-weight: 600;
+      transition: all var(--transition); font-size: 0.95rem;
+    }
+    .btn-modal-cancel:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+
+    .btn-modal-submit {
+      padding: 0.75rem 1.5rem; border-radius: 20px; border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; cursor: pointer; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+      transition: all var(--transition); font-size: 0.95rem;
+    }
+    .btn-modal-submit:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,122,255,0.4); }
+
+    .btn-modal-submit-danger {
+      padding: 0.75rem 1.5rem; border-radius: 20px; border: none;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff; cursor: pointer; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.35);
+      transition: all var(--transition); font-size: 0.95rem;
+    }
+    .btn-modal-submit-danger:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .modal-user-label {
+      font-weight: 700; color: var(--text);
+      background: rgba(255,255,255,0.18);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.75rem 1rem; font-size: 0.95rem;
+    }
+
+    /* ── Modal animation ── */
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.9) translateY(20px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0);    }
+    }
+
+    /* ── Hide scrollbars ── */
+    ::-webkit-scrollbar { display: none; }
+    body, .table-responsive, .dashboard-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    </div>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"            class="nav-link">Trang chủ</a>
+      <a href="about-us.html"         class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"          class="nav-link">Chương trình học</a>
+      <a href="contact.html"          class="nav-link">Liên hệ</a>
+      <a href="admin-community.html"  class="nav-link nav-community">Cộng đồng</a>
+      <a href="admin-dashboard.html"  class="nav-link nav-dashboard active">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"            class="nav-link">Trang chủ</a>
+    <a href="about-us.html"         class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"          class="nav-link">Chương trình học</a>
+    <a href="contact.html"          class="nav-link">Liên hệ</a>
+    <a href="admin-community.html"  class="nav-link nav-community">Cộng đồng</a>
+    <a href="admin-dashboard.html"  class="nav-link nav-dashboard active">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <h2>Quản lý</h2>
+      <a href="manage-users.html"  class="active">👥 Quản lý người dùng</a>
+      <a href="manage-classes.html">📚 Quản lý lớp học</a>
+      <a href="manage-lessons.html">📝 Quản lý bài học</a>
+      <a href="profile.html">👤 Thông tin cá nhân</a>
+      <a href="settings.html">⚙️ Cài đặt</a>
+      <a href="payment-history.html">💳 Lịch sử thanh toán</a>
+      <a href="admin-community.html">🌐 Cộng đồng</a>
+    </aside>
+    <main class="dashboard-main">
+      <div class="dash-header">
+        <div class="dash-header-left">
+          <button id="desktopSidebarToggle" aria-label="Mở menu"><span></span><span></span><span></span></button>
+          <h1>Quản lý người dùng</h1>
+        </div>
+        <div class="dash-header-right">
+          <button class="btn-export btn-primary-glass" onclick="openAddUserModal()">
+            <span>➕</span> Cấp tài khoản mới
+          </button>
+          <button class="btn-export" onclick="exportToExcel()">
+            <span>📊</span> Tải xuống XLSX
+          </button>
+        </div>
+      </div>
+      <p class="text-muted mt-1">Danh sách thông tin người dùng được cập nhật liên tục.</p>
+
+      <div class="table-responsive">
+        <table class="data-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Họ và Tên</th>
+              <th>Tài khoản</th>
+              <th>Mật khẩu</th>
+              <th>Quyền hạn</th>
+              <th>Hạn dùng</th>
+              <th>Số điện thoại</th>
+              <th>Email</th>
+              <th>Giấy tờ định danh</th>
+              <th>Ngày sinh</th>
+              <th>Khóa học / Mã lớp</th>
+              <th>Tên trường</th>
+              <th>Hạn thẻ SV</th>
+              <th>Trạng thái</th>
+              <th>Lý do</th>
+              <th>Admin xử lý</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Render via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Thêm Người Dùng -->
+  <div id="addUserModal" class="modal-overlay">
+    <div class="modal-panel">
+      <h2 class="modal-title">Cấp tài khoản mới</h2>
+      <form id="addUserForm" class="modal-form">
+        <div class="form-group">
+          <label for="addName">Họ và Tên <span class="req">*</span></label>
+          <input type="text" id="addName" placeholder="Nguyễn Văn A" required>
+        </div>
+        <div class="form-group">
+          <label for="addUser">Tên tài khoản / Mã định danh <span class="req">*</span></label>
+          <input type="text" id="addUser" placeholder="VD: admin01" required>
+        </div>
+        <div class="form-group">
+          <label for="addPass">Mật khẩu khởi tạo <span class="req">*</span></label>
+          <input type="text" id="addPass" placeholder="Nhập ít nhất 8 ký tự" required>
+        </div>
+        <div class="form-group">
+          <label>Vai trò <span class="req">*</span></label>
+          <div class="role-chips">
+            <label class="role-chip"><input type="radio" name="addRole" value="student" required checked>👨‍🎓 Học viên</label>
+            <label class="role-chip"><input type="radio" name="addRole" value="teacher" required>👨‍🏫 Giảng viên</label>
+            <label class="role-chip"><input type="radio" name="addRole" value="admin" required>🛡️ Quản trị</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" onclick="closeAddUserModal()">Hủy</button>
+          <button type="submit" class="btn-modal-submit">Tạo tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Sửa Người Dùng -->
+  <div id="editUserModal" class="modal-overlay">
+    <div class="modal-panel">
+      <h2 class="modal-title">Sửa thông tin tài khoản</h2>
+      <form id="editUserForm" class="modal-form">
+        <div class="form-group">
+          <label for="editName">Họ và Tên <span class="req">*</span></label>
+          <input type="text" id="editName" placeholder="Nguyễn Văn A" required>
+        </div>
+        <div class="form-group">
+          <label for="editUser">Tên tài khoản (Không thể sửa)</label>
+          <input type="text" id="editUser" placeholder="Tên tài khoản" readonly style="cursor:not-allowed; opacity:0.7;">
+        </div>
+        <div class="form-group">
+          <label for="editPass">Mật khẩu mới (Tùy chọn)</label>
+          <input type="text" id="editPass" placeholder="Để trống nếu không đổi">
+        </div>
+        <div class="form-group">
+          <label>Vai trò <span class="req">*</span></label>
+          <div class="role-chips">
+            <label class="role-chip"><input type="radio" name="editRole" value="student" required>👨‍🎓 Học viên</label>
+            <label class="role-chip"><input type="radio" name="editRole" value="teacher" required>👨‍🏫 Giảng viên</label>
+            <label class="role-chip"><input type="radio" name="editRole" value="admin" required>🛡️ Quản trị</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" onclick="closeEditUserModal()">Hủy</button>
+          <button type="submit" class="btn-modal-submit">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Xử Lý Trạng Thái -->
+  <div id="processUserModal" class="modal-overlay">
+    <div class="modal-panel">
+      <h2 class="modal-title-danger">Xử lý tài khoản</h2>
+      <p id="processUserName" class="modal-user-label"></p>
+      <form id="processUserForm" class="modal-form" style="margin-top:1rem;">
+        <div class="form-group">
+          <label>Hành động <span class="req">*</span></label>
+          <div class="role-chips" style="flex-direction: column; gap:0.4rem;">
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="active" required checked>🟢 Hoạt động bình thường</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="suspended" required>🟡 Tạm ngưng (Không truy cập lớp)</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="banned" required>🔴 Cấm vĩnh viễn (Cấm đăng nhập)</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="delete" required>🗑️ Xóa tài khoản (Mất dữ liệu)</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="processReason">Lý do xử lý <span class="req">*</span></label>
+          <input type="text" id="processReason" placeholder="VD: Vi phạm nội quy..." required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" onclick="closeProcessModal()">Hủy</button>
+          <button type="submit" class="btn-modal-submit-danger">Xác nhận</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    let userList = JSON.parse(localStorage.getItem('users_db'));
+    if (!userList) {
+      userList = [
+        { name: "Mai Quốc Bảo", user: "23DH710401", pass: "Maiquocbao7$", role: "admin", expiry: "Vĩnh viễn", phone: "358818325", email: "23DH710401@st.huflit.edu.vn", idNum: "23DH710401", dob: "07/05/2005", course: "", school: "", svExpiry: "", status: "active", reason: "Admin hệ thống", adminId: "" },
+        { name: "Nguyễn Thị Cẩm Vân", user: "22DH717712", pass: "Benam7224venn", role: "admin", expiry: "Vĩnh viễn", phone: "", email: "22DH717712@st.huflit.edu.vn", idNum: "22DH717712", dob: "07/02/2004", course: "", school: "", svExpiry: "", status: "active", reason: "Admin hệ thống", adminId: "" },
+        { name: "GV01", user: "GV01", pass: "Maiquocbao7$", role: "teacher", expiry: "permanent", phone: "358818325", email: "", idNum: "", dob: "", course: "", school: "", svExpiry: "", status: "active", reason: "Cấp mới bởi Admin", adminId: "23DH710401@st.huflit.edu.vn" },
+        { name: "HS01", user: "HS01", pass: "Maiquocbao7$", role: "student", expiry: "permanent", phone: "358818325", email: "", idNum: "", dob: "", course: "", school: "", svExpiry: "", status: "active", reason: "Cấp mới bởi Admin", adminId: "23DH710401@st.huflit.edu.vn" },
+        { name: "HS02", user: "HS02", pass: "Demo@123", role: "student", expiry: "permanent", phone: "358818325", email: "", idNum: "", dob: "", course: "", school: "", svExpiry: "", status: "active", reason: "Admin cập nhật thông tin / Gia hạn", adminId: "23DH715659" },
+        { name: "23DH715659", user: "23DH715659", pass: "Demo@123", role: "admin", expiry: "permanent", phone: "", email: "23DH715659@st.huflit.edu.vn", idNum: "23DH715659", dob: "", course: "", school: "HUFLIT", svExpiry: "07/27", status: "active", reason: "Admin cập nhật thông tin / Gia hạn", adminId: "22DH717712" },
+        { name: "Nguyễn Kim Bích Ngọc", user: "23DH712663", pass: "Demo@123", role: "admin", expiry: "permanent", phone: "", email: "23DH712663@st.huflit.edu.vn", idNum: "23DH712663", dob: "", course: "", school: "Trường đại học Ngoại ngữ - Tin học thành phố Hồ Chí Minh (HUFLIT)", svExpiry: "07/28", status: "active", reason: "Cấp mới", adminId: "23DH710401" }
+      ];
+      localStorage.setItem('users_db', JSON.stringify(userList));
+    }
+
+    function saveDB() {
+      localStorage.setItem('users_db', JSON.stringify(userList));
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '';
+
+      const currentUsername = sessionStorage.getItem('username');
+      const isSuperAdmin = (currentUsername === '23DH710401');
+
+      userList.forEach(u => {
+        let displayPass = u.pass;
+        let displayUser = u.user;
+        let isPeerAdmin = (u.role === 'admin' && u.user !== currentUsername);
+
+        if (!isSuperAdmin && isPeerAdmin) {
+          displayPass = '***';
+          displayUser = '***';
+        }
+
+        let editButtonHtml = '';
+        if (!isSuperAdmin && isPeerAdmin) {
+          editButtonHtml = `<button disabled class="btn-row btn-row-disabled" title="Không có quyền sửa Admin khác">🚫 Khóa</button>`;
+        } else {
+          editButtonHtml = `<button onclick="editUser('${u.user}')" class="btn-row btn-row-edit">✏️ Sửa</button>`;
+        }
+
+        let processButtonHtml = '';
+        if (u.user !== currentUsername) {
+          if (isSuperAdmin || u.role !== 'admin') {
+            processButtonHtml = `<button onclick="openProcessModal('${u.user}')" class="btn-row btn-row-danger">🛡️ Xử lý</button>`;
+          }
+        }
+
+        const initial = u.name ? u.name.charAt(0).toUpperCase() : 'U';
+        const avatarHtml = `<div class="user-avatar">${initial}</div>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${avatarHtml}</td>
+          <td>${u.name}</td>
+          <td>${displayUser}</td>
+          <td>${displayPass}</td>
+          <td><span class="role-badge ${u.role}">${u.role}</span></td>
+          <td>${u.expiry}</td>
+          <td>${u.phone}</td>
+          <td>${u.email}</td>
+          <td>${u.idNum}</td>
+          <td>${u.dob}</td>
+          <td>${u.course}</td>
+          <td>${u.school}</td>
+          <td>${u.svExpiry}</td>
+          <td>${u.status}</td>
+          <td>${u.reason}</td>
+          <td>${u.adminId}</td>
+          <td>
+            <div style="display:flex; gap:6px; align-items:center;">
+              ${editButtonHtml}
+              ${processButtonHtml}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    let currentEditUserId = null;
+
+    function editUser(userId) {
+      const userObj = userList.find(u => u.user === userId);
+      if (!userObj) return;
+
+      const currentUsername = sessionStorage.getItem('username');
+      const isSuperAdmin = (currentUsername === '23DH710401');
+
+      if (!isSuperAdmin && userObj.role === 'admin' && userObj.user !== currentUsername) {
+        alert("Bạn không có quyền chỉnh sửa tài khoản Admin khác!");
+        return;
+      }
+
+      currentEditUserId = userId;
+      document.getElementById('editName').value = userObj.name;
+      document.getElementById('editUser').value = userObj.user;
+
+      if (!isSuperAdmin && userObj.role === 'admin' && userObj.user !== currentUsername) {
+        document.getElementById('editPass').value = '';
+        document.getElementById('editPass').placeholder = 'Mật khẩu (Đã ẩn)';
+      } else {
+        document.getElementById('editPass').value = userObj.pass;
+        document.getElementById('editPass').placeholder = 'Để trống nếu không đổi';
+      }
+
+      document.querySelectorAll(`input[name="editRole"]`).forEach(r => r.checked = false);
+      const roleRadio = document.querySelector(`input[name="editRole"][value="${userObj.role}"]`);
+      if(roleRadio) roleRadio.checked = true;
+
+      document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').style.display = 'none';
+      currentEditUserId = null;
+    }
+
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userObj = userList.find(u => u.user === currentEditUserId);
+      if (userObj) {
+        userObj.name = document.getElementById('editName').value.trim();
+        const newPass = document.getElementById('editPass').value.trim();
+        if (newPass !== '') { userObj.pass = newPass; }
+        const roleEl = document.querySelector('input[name="editRole"]:checked');
+        if(roleEl) userObj.role = roleEl.value;
+        userObj.adminId = sessionStorage.getItem('name') || "Admin";
+        userObj.reason = "Admin cập nhật thông tin";
+        saveDB();
+        renderTable();
+        closeEditUserModal();
+        alert('Cập nhật thông tin thành công!');
+      }
+    });
+
+    let currentProcessUserId = null;
+
+    function openProcessModal(userId) {
+      const userObj = userList.find(u => u.user === userId);
+      if (!userObj) return;
+      currentProcessUserId = userId;
+      document.getElementById('processUserName').textContent = `Tài khoản: ${userObj.user}`;
+      document.getElementById('processReason').value = userObj.reason || '';
+
+      document.querySelectorAll(`input[name="processAction"]`).forEach(r => r.checked = false);
+      let actionVal = userObj.status || 'active';
+      const actionRadio = document.querySelector(`input[name="processAction"][value="${actionVal}"]`);
+      if(actionRadio) actionRadio.checked = true;
+
+      document.getElementById('processUserModal').style.display = 'flex';
+    }
+
+    function closeProcessModal() {
+      document.getElementById('processUserModal').style.display = 'none';
+      currentProcessUserId = null;
+    }
+
+    document.getElementById('processUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userObj = userList.find(u => u.user === currentProcessUserId);
+      if (userObj) {
+        const actionEl = document.querySelector('input[name="processAction"]:checked');
+        const action = actionEl ? actionEl.value : 'active';
+        const reason = document.getElementById('processReason').value.trim();
+
+        if (action === 'delete') {
+          if (confirm('Bạn có chắc chắn muốn XÓA HOÀN TOÀN tài khoản này? Mọi dữ liệu sẽ bị mất và không thể khôi phục!')) {
+            userList = userList.filter(u => u.user !== currentProcessUserId);
+            alert('Đã xóa tài khoản thành công!');
+          } else { return; }
+        } else {
+          userObj.status = action;
+          userObj.reason = reason;
+          alert('Cập nhật trạng thái thành công!');
+        }
+        saveDB();
+        renderTable();
+        closeProcessModal();
+      }
+    });
+
+    function exportToExcel() {
+      const table = document.getElementById('usersTable');
+      const workbook = XLSX.utils.table_to_book(table, { sheet: "Users" });
+      XLSX.writeFile(workbook, 'Danh_Sach_Nguoi_Dung.xlsx');
+    }
+
+    function openAddUserModal() {
+      document.getElementById('addUserModal').style.display = 'flex';
+    }
+    function closeAddUserModal() {
+      document.getElementById('addUserModal').style.display = 'none';
+    }
+
+    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name    = document.getElementById('addName').value.trim();
+      const user    = document.getElementById('addUser').value.trim();
+      const pass    = document.getElementById('addPass').value.trim();
+      const roleEl  = document.querySelector('input[name="addRole"]:checked');
+      const role    = roleEl ? roleEl.value : 'student';
+      const adminId = sessionStorage.getItem('name') || "Admin";
+
+      userList.unshift({
+        name, user, pass, role,
+        expiry: "Cấp mới",
+        phone: "", email: "",
+        idNum: user, dob: "", course: "",
+        school: "LMS EDU PRO", svExpiry: "",
+        status: "active",
+        reason: "Admin cấp mới",
+        adminId
+      });
+
+      saveDB();
+      renderTable();
+      closeAddUserModal();
+      this.reset();
+      alert('Đã cấp tài khoản "' + user + '" thành công!');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTable();
+    });
+
+    window.addEventListener('click', function(e) {
+      if (e.target.id === 'addUserModal')     closeAddUserModal();
+      if (e.target.id === 'editUserModal')    closeEditUserModal();
+      if (e.target.id === 'processUserModal') closeProcessModal();
+    });
+  </script>
+</body>
+</html>

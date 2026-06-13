@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng điều khiển Học sinh – LMS EDU PRO</title>
+  <meta name="description" content="Quản lý khóa học và học tập dành cho Học sinh trên LMS EDU PRO.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Dashboard header row ── */
+    .dash-header { display:flex; align-items:center; gap:10px; margin-bottom:1.5rem; }
+
+    /* ── Welcome card ── */
+    .welcome-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .welcome-card .welcome-icon {
+      font-size: 3rem;
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 12px rgba(0,122,255,0.25));
+    }
+    .welcome-card .welcome-text h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.4rem;
+    }
+    .welcome-card .welcome-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* ── Quick-nav pills ── */
+    .quick-nav { display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:1.5rem; }
+    .quick-nav a {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 20px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+    .quick-nav a:hover {
+      background: rgba(255,255,255,0.35);
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* ── Hide scrollbars ── */
+    ::-webkit-scrollbar { display: none; }
+    body, .dashboard-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"              class="nav-link">Trang chủ</a>
+      <a href="about-us.html"           class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"            class="nav-link">Chương trình học</a>
+      <a href="contact.html"            class="nav-link">Liên hệ</a>
+      <a href="student-community.html"  class="nav-link nav-community">Cộng đồng</a>
+      <a href="student-dashboard.html"  class="nav-link nav-dashboard active">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"              class="nav-link">Trang chủ</a>
+    <a href="about-us.html"           class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"            class="nav-link">Chương trình học</a>
+    <a href="contact.html"            class="nav-link">Liên hệ</a>
+    <a href="student-community.html"  class="nav-link nav-community">Cộng đồng</a>
+    <a href="student-dashboard.html"  class="nav-link nav-dashboard active">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <h2>Học sinh</h2>
+      <a href="current-courses.html" class="active">📖 Khóa học hiện tại</a>
+      <a href="payment-history.html">💳 Lịch sử thanh toán</a>
+      <a href="profile.html">👤 Thông tin cá nhân</a>
+      <a href="settings.html">⚙️ Cài đặt</a>
+      <a href="student-community.html">🌐 Cộng đồng</a>
+    </aside>
+    <main class="dashboard-main">
+      <div class="dash-header">
+        <button id="desktopSidebarToggle" aria-label="Mở menu"><span></span><span></span><span></span></button>
+        <h1>Chào mừng Học sinh!</h1>
+      </div>
+      <p class="text-muted mt-1">Chọn một mục trong menu bên trái để xem thông tin học tập của bạn.</p>
+
+      <!-- Welcome glass card -->
+      <div class="welcome-card">
+        <div class="welcome-icon">📖</div>
+        <div class="welcome-text">
+          <h2>Tiếp tục hành trình học tập</h2>
+          <p>Truy cập khóa học, theo dõi tiến độ và kết nối với cộng đồng học viên ngay hôm nay.</p>
+        </div>
+      </div>
+
+      <!-- Quick navigation pills -->
+      <div class="quick-nav">
+        <a href="current-courses.html">📖 Khóa học của tôi</a>
+        <a href="payment-history.html">💳 Lịch sử thanh toán</a>
+        <a href="profile.html">👤 Hồ sơ cá nhân</a>
+        <a href="student-community.html">🌐 Cộng đồng</a>
+        <a href="settings.html">⚙️ Cài đặt</a>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+</body>
+</html>

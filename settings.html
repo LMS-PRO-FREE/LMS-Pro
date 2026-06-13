@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cài đặt – LMS EDU PRO</title>
+  <meta name="description" content="Cài đặt tài khoản người dùng trên LMS EDU PRO.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .settings-layout {
+      max-width: 1000px; margin: 0 auto 5rem; padding: 2.5rem 1.5rem;
+      display: grid; grid-template-columns: 240px 1fr; gap: 1.8rem; align-items: start;
+    }
+    @media (max-width: 720px) { .settings-layout { grid-template-columns: 1fr; } }
+
+    /* Settings sidebar nav */
+    .settings-nav {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); padding: 1.4rem 1rem;
+    }
+    .settings-nav h3 {
+      font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      padding: 0 0.5rem; margin-bottom: 0.6rem;
+    }
+    .settings-nav a {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.65rem 0.9rem; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 500; color: var(--text); text-decoration: none;
+      transition: all var(--transition); margin-bottom: 0.2rem;
+    }
+    .settings-nav a:hover { background: rgba(0,122,255,0.08); color: var(--primary); }
+    .settings-nav a.active {
+      background: linear-gradient(135deg, rgba(0,122,255,0.14), rgba(52,199,89,0.07));
+      color: var(--primary); font-weight: 700; border: 1px solid rgba(0,122,255,0.18);
+    }
+    .settings-nav .nav-divider { border-top: 1px solid var(--border); margin: 0.8rem 0; }
+
+    /* Section cards */
+    .settings-main { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .settings-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); padding: 2rem 2rem;
+    }
+    .settings-card h2 {
+      font-size: 1.1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.4rem;
+    }
+    .settings-card .card-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.1rem; }
+    .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* Toggle switch */
+    .toggle-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 0; border-bottom: 1px solid var(--border);
+    }
+    .toggle-item:last-child { border-bottom: none; }
+    .toggle-label { flex: 1; }
+    .toggle-label strong { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
+    .toggle-label span   { font-size: 0.8rem; color: var(--text-muted); }
+
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.15); border-radius: 24px; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: transform var(--transition);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* Danger zone */
+    .danger-card {
+      background: rgba(255,59,48,0.05);
+      border: 1px solid rgba(255,59,48,0.18); border-radius: var(--radius); padding: 1.8rem 2rem;
+    }
+    .danger-card h2 { color: #d93025; -webkit-text-fill-color: #d93025; background: none; font-size: 1.05rem; margin-bottom: 0.4rem; }
+    .danger-card .card-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem; }
+
+    /* Buttons */
+    .btn-save {
+      background: linear-gradient(135deg, var(--primary), #0051d5); color: #fff;
+      border: none; border-radius: 16px; padding: 0.65rem 1.6rem;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,122,255,0.3); transition: all var(--transition);
+    }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,122,255,0.4); }
+    .btn-danger {
+      background: rgba(255,59,48,0.1); color: #d93025;
+      border: 1px solid rgba(255,59,48,0.25); border-radius: 16px; padding: 0.65rem 1.4rem;
+      font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all var(--transition);
+    }
+    .btn-danger:hover { background: rgba(255,59,48,0.18); }
+
+    /* Page title */
+    .page-title-area { padding: 3rem 1.5rem 0; max-width: 1000px; margin: 0 auto; }
+    .page-title-area h1 {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.3rem;
+    }
+    .page-title-area p { color: var(--text-muted); font-size: 0.95rem; }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <main class="main-wrapper">
+
+    <div class="page-title-area">
+      <h1>⚙️ Cài đặt</h1>
+      <p>Quản lý tài khoản, bảo mật và tuỳ chọn thông báo của bạn.</p>
+    </div>
+
+    <div class="settings-layout">
+
+      <!-- Sidebar nav -->
+      <nav class="settings-nav">
+        <h3>Tài khoản</h3>
+        <a href="#account"  class="active">👤 Thông tin tài khoản</a>
+        <a href="#security">🔐 Bảo mật &amp; Mật khẩu</a>
+        <a href="#notif">   🔔 Thông báo</a>
+        <div class="nav-divider"></div>
+        <h3>Giao diện</h3>
+        <a href="#display">🎨 Hiển thị &amp; Ngôn ngữ</a>
+        <div class="nav-divider"></div>
+        <h3>Nguy hiểm</h3>
+        <a href="#danger" style="color:#d93025;">🗑 Xóa tài khoản</a>
+      </nav>
+
+      <!-- Main settings -->
+      <div class="settings-main">
+
+        <!-- Account info -->
+        <div class="settings-card" id="account">
+          <h2>👤 Thông tin tài khoản</h2>
+          <p class="card-desc">Cập nhật họ tên hiển thị và địa chỉ email của bạn.</p>
+          <form onsubmit="saveAccount(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sFirstName">Họ</label>
+                <input type="text" id="sFirstName" placeholder="Nguyễn">
+              </div>
+              <div class="form-group">
+                <label for="sLastName">Tên</label>
+                <input type="text" id="sLastName" placeholder="Văn A">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="sEmail">Email</label>
+              <input type="email" id="sEmail" placeholder="email@example.com" style="cursor:not-allowed;" readonly>
+            </div>
+            <div class="form-group">
+              <label for="sUsername">Tên người dùng</label>
+              <input type="text" id="sUsername" placeholder="username123">
+            </div>
+            <button type="submit" class="btn-save">💾 Lưu thay đổi</button>
+          </form>
+        </div>
+
+        <!-- Security -->
+        <div class="settings-card" id="security">
+          <h2>🔐 Bảo mật &amp; Mật khẩu</h2>
+          <p class="card-desc">Thay đổi mật khẩu và bật xác minh 2 bước để bảo vệ tài khoản.</p>
+          <form onsubmit="savePassword(event)">
+            <div class="form-group">
+              <label for="oldPwd">Mật khẩu hiện tại</label>
+              <input type="password" id="oldPwd" placeholder="••••••••">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newPwd">Mật khẩu mới</label>
+                <input type="password" id="newPwd" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label for="confirmPwd">Xác nhận mật khẩu</label>
+                <input type="password" id="confirmPwd" placeholder="••••••••">
+              </div>
+            </div>
+            <button type="submit" class="btn-save">🔑 Đổi mật khẩu</button>
+          </form>
+        </div>
+
+        <!-- Notifications -->
+        <div class="settings-card" id="notif">
+          <h2>🔔 Cài đặt thông báo</h2>
+          <p class="card-desc">Chọn loại thông báo bạn muốn nhận qua email và trong ứng dụng.</p>
+
+          <div class="toggle-item">
+            <div class="toggle-label">
+              <strong>Thông báo khóa học mới</strong>
+              <span>Nhận email khi có khóa học mới phù hợp với bạn</span>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-label">
+              <strong>Nhắc nhở học tập hàng ngày</strong>
+              <span>Nhận nhắc nhở để duy trì chuỗi học tập mỗi ngày</span>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-label">
+              <strong>Lời mời kết bạn</strong>
+              <span>Thông báo khi có người gửi lời mời kết bạn</span>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-label">
+              <strong>Cập nhật hệ thống</strong>
+              <span>Thông báo về tính năng mới và bảo trì hệ thống</span>
+            </div>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-label">
+              <strong>Email khuyến mãi</strong>
+              <span>Nhận ưu đãi và khuyến mãi từ LMS EDU PRO</span>
+            </div>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+
+          <div style="margin-top:1.2rem;">
+            <button class="btn-save" onclick="alert('Đã lưu cài đặt thông báo!')">💾 Lưu cài đặt</button>
+          </div>
+        </div>
+
+        <!-- Display & Language -->
+        <div class="settings-card" id="display">
+          <h2>🎨 Hiển thị &amp; Ngôn ngữ</h2>
+          <p class="card-desc">Tuỳ chỉnh giao diện và ngôn ngữ của ứng dụng.</p>
+          <div class="form-group">
+            <label for="sLang">Ngôn ngữ giao diện</label>
+            <select id="sLang">
+              <option value="vi" selected>🇻🇳 Tiếng Việt</option>
+              <option value="en">🇬🇧 English</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sTheme">Chủ đề giao diện</label>
+            <select id="sTheme" onchange="applyTheme(this.value)">
+              <option value="light" selected>☀️ Sáng (Light)</option>
+              <option value="dark">🌙 Tối (Dark)</option>
+              <option value="system">💻 Theo hệ thống</option>
+            </select>
+          </div>
+          <button class="btn-save" onclick="alert('Đã lưu cài đặt hiển thị!')">💾 Áp dụng</button>
+        </div>
+
+        <!-- Danger zone -->
+        <div class="danger-card" id="danger">
+          <h2>⚠️ Vùng nguy hiểm</h2>
+          <p class="card-desc">Các thao tác này không thể hoàn tác. Vui lòng suy nghĩ kỹ trước khi thực hiện.</p>
+          <button class="btn-danger" onclick="confirmDelete()">🗑 Xóa tài khoản vĩnh viễn</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    // Sidebar active on scroll
+    document.querySelectorAll('.settings-nav a[href^="#"]').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelectorAll('.settings-nav a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    function saveAccount(e) {
+      e.preventDefault();
+      alert('✅ Thông tin tài khoản đã được cập nhật!');
+    }
+
+    function savePassword(e) {
+      e.preventDefault();
+      const np = document.getElementById('newPwd').value;
+      const cp = document.getElementById('confirmPwd').value;
+      if (np !== cp) { alert('❌ Mật khẩu xác nhận không khớp!'); return; }
+      alert('✅ Mật khẩu đã được thay đổi thành công!');
+      e.target.reset();
+    }
+
+    function applyTheme(val) {
+      if (val === 'dark') document.body.dataset.theme = 'dark';
+      else document.body.dataset.theme = 'light';
+    }
+
+    function confirmDelete() {
+      if (confirm('⚠️ Bạn có chắc chắn muốn xóa tài khoản? Thao tác này không thể hoàn tác!')) {
+        alert('Yêu cầu xóa tài khoản đã được gửi. Đội ngũ hỗ trợ sẽ liên hệ với bạn.');
+      }
+    }
+
+    // Load user email
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('lms_user') || '{}');
+      if (user.email) document.getElementById('sEmail').value = user.email;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý bài học – Admin – LMS EDU PRO</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Page Header ── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-header-right {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Table Wrapper ── */
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-shadow);
+      padding: 1px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+      font-size: 0.9rem;
+      border-radius: calc(var(--radius) - 1px);
+      overflow: hidden;
+    }
+    .data-table th,
+    .data-table td {
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding: 1rem;
+      text-align: left;
+      color: var(--text);
+    }
+    .data-table th {
+      background: rgba(255,255,255,0.25);
+      font-weight: 700;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .data-table tbody tr { transition: background var(--transition); }
+    .data-table tbody tr:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── Primary Action Button ── */
+    .btn-primary-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), #005ecb);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 0.7rem 1.4rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+      transition: all var(--transition);
+    }
+    .btn-primary-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,122,255,0.45);
+    }
+
+    /* ── Small Table Action Buttons ── */
+    .btn-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: none;
+      border-radius: 12px;
+      padding: 5px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-sm-primary {
+      background: linear-gradient(135deg, var(--primary), #005ecb);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+    }
+    .btn-sm-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,122,255,0.4); }
+
+    /* ── Status Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 20px;
+      padding: 0.22rem 0.8rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-public {
+      background: rgba(52,199,89,0.15);
+      color: var(--secondary);
+      border: 1px solid rgba(52,199,89,0.3);
+    }
+    .badge-draft {
+      background: rgba(255,149,0,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(255,149,0,0.3);
+    }
+    .badge-format {
+      background: rgba(0,122,255,0.1);
+      color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.2);
+    }
+
+    /* ── Scrollbar hide ── */
+    ::-webkit-scrollbar { display: none; }
+    body, .table-responsive, .dashboard-sidebar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <header class="navbar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    </div>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html" class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html" class="nav-link">Chương trình học</a>
+      <a href="contact.html" class="nav-link">Liên hệ</a>
+      <a href="admin-community.html" class="nav-link nav-community">Cộng đồng</a>
+      <a href="admin-dashboard.html" class="nav-link nav-dashboard active">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html" class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html" class="nav-link">Chương trình học</a>
+    <a href="contact.html" class="nav-link">Liên hệ</a>
+    <a href="admin-community.html" class="nav-link nav-community">Cộng đồng</a>
+    <a href="admin-dashboard.html" class="nav-link nav-dashboard active">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar" id="dynamicSidebar"></aside>
+    <script>
+      (function(){
+        const role = sessionStorage.getItem('role') || 'admin';
+        const sidebar = document.getElementById('dynamicSidebar');
+        if (role === 'teacher') {
+          sidebar.innerHTML = `
+            <h2>Giáo viên</h2>
+            <a href="manage-lessons.html">📝 Quản lý bài học</a>
+            <a href="manage-classes.html">📚 Quản lý lớp học</a>
+            <a href="profile.html">👤 Thông tin cá nhân</a>
+            <a href="settings.html">⚙️ Cài đặt</a>
+            <a href="community.html">🌐 Cộng đồng</a>
+          `;
+        } else {
+          sidebar.innerHTML = `
+            <h2>Quản lý</h2>
+            <a href="admin-dashboard.html">👥 Quản lý người dùng</a>
+            <a href="manage-classes.html">📚 Quản lý lớp học</a>
+            <a href="manage-lessons.html">📝 Quản lý bài học</a>
+            <a href="profile.html">👤 Thông tin cá nhân</a>
+            <a href="settings.html">⚙️ Cài đặt</a>
+            <a href="payment-history.html">💳 Lịch sử thanh toán</a>
+            <a href="community.html">🌐 Cộng đồng</a>
+          `;
+        }
+        const currentPath = window.location.pathname.split('/').pop() || 'manage-lessons.html';
+        sidebar.querySelectorAll('a').forEach(a => {
+          if (a.getAttribute('href') === currentPath) {
+            a.classList.add('active');
+          } else {
+            a.classList.remove('active');
+          }
+        });
+      })();
+    </script>
+
+    <main class="dashboard-main">
+      <div class="page-header">
+        <div class="page-header-left">
+          <button id="desktopSidebarToggle" aria-label="Mở menu"><span></span><span></span><span></span></button>
+          <h1 class="page-title">Quản lý bài học</h1>
+        </div>
+        <div class="page-header-right">
+          <button class="btn-primary-action">
+            <span>➕</span> Thêm bài học
+          </button>
+        </div>
+      </div>
+      <p class="page-subtitle">Danh sách tất cả bài giảng và tài liệu trên hệ thống.</p>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên bài học</th>
+              <th>Khóa học</th>
+              <th>Định dạng</th>
+              <th>Lượt xem</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="lessonsTableBody">
+            <!-- Render via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const lessonList = [
+      { id: "BH-001", name: "Unit 1: Introduction to IELTS", teacherUser: "GV01", course: "IELTS Preparation", format: "Video + PDF", views: "1,245", status: "Công khai" },
+      { id: "BH-002", name: "Unit 2: IELTS Reading Strategies", teacherUser: "GV02", course: "IELTS Preparation", format: "Video + Quiz", views: "890", status: "Công khai" },
+      { id: "BH-003", name: "Unit 1: Toeic Listening Part 1", teacherUser: "GV01", course: "TOEIC Intensive", format: "Audio + PDF", views: "2,100", status: "Bản nháp" }
+    ];
+
+    function renderLessons() {
+      const role = sessionStorage.getItem('role') || 'admin';
+      const username = sessionStorage.getItem('username');
+      const tbody = document.getElementById('lessonsTableBody');
+      tbody.innerHTML = '';
+
+      lessonList.forEach(l => {
+        if (role === 'teacher' && l.teacherUser !== username) return;
+
+        const isPublic = l.status === 'Công khai';
+        const statusBadge = isPublic
+          ? `<span class="badge badge-public">✅ ${l.status}</span>`
+          : `<span class="badge badge-draft">📝 ${l.status}</span>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-weight:700; color:var(--primary); font-size:0.85rem;">${l.id}</span></td>
+          <td><strong>${l.name}</strong></td>
+          <td style="color:var(--text-muted);">${l.course}</td>
+          <td><span class="badge badge-format">${l.format}</span></td>
+          <td style="font-weight:600;">${l.views}</td>
+          <td>${statusBadge}</td>
+          <td><button class="btn-sm btn-sm-primary">✏️ Sửa</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderLessons);
+  </script>
+</body>
+</html>

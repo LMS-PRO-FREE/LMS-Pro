@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch sử thanh toán – LMS EDU PRO</title>
+  <meta name="description" content="Lịch sử thanh toán và giao dịch của người dùng.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero {
+      text-align: center; padding: 4rem 2rem 2.5rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(52,199,89,0.12); color: var(--secondary);
+      border: 1px solid rgba(52,199,89,0.22); border-radius: 20px;
+      padding: 0.3rem 1rem; font-size: 0.82rem; font-weight: 600; margin-bottom: 1.4rem;
+    }
+    .page-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.8rem;
+    }
+    .page-hero p { font-size: 1rem; color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.7; }
+
+    /* Summary cards */
+    .payment-summary {
+      max-width: 1000px; margin: 0 auto 2.5rem; padding: 0 1.5rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.1rem;
+    }
+    .psum-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); padding: 1.4rem 1.3rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .psum-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+    }
+    .psi-green  { background: rgba(52,199,89,0.12); }
+    .psi-blue   { background: rgba(0,122,255,0.12); }
+    .psi-orange { background: rgba(255,149,0,0.12); }
+    .psum-val {
+      font-size: 1.3rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .psum-lbl { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* History section */
+    .history-section { max-width: 1000px; margin: 0 auto 5rem; padding: 0 1.5rem; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .section-header h2 {
+      font-size: 1.25rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* Filter bar */
+    .filter-bar { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .filter-btn {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 0.38rem 1rem; font-size: 0.82rem; font-weight: 600; color: var(--text);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .filter-btn.active,
+    .filter-btn:hover {
+      background: linear-gradient(135deg, var(--primary), #0051d5);
+      color: #fff; border-color: transparent; box-shadow: 0 3px 12px rgba(0,122,255,0.3);
+    }
+
+    /* Table wrapper */
+    .table-glass {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .payment-table { width: 100%; border-collapse: collapse; }
+    .payment-table thead tr {
+      background: rgba(255,255,255,0.25);
+    }
+    .payment-table th {
+      padding: 1rem 1.2rem; text-align: left;
+      font-size: 0.75rem; font-weight: 700; color: var(--text);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .payment-table td {
+      padding: 1rem 1.2rem; font-size: 0.88rem; color: var(--text);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .payment-table tbody tr:last-child td { border-bottom: none; }
+    .payment-table tbody tr:hover td { background: rgba(255,255,255,0.2); }
+
+    .amount-val {
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .amount-val.free { background: linear-gradient(135deg, var(--secondary), #28a745); }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      border-radius: 20px; padding: 0.2rem 0.7rem;
+      font-size: 0.76rem; font-weight: 700;
+    }
+    .status-success { background: rgba(52,199,89,0.12); color: #28a745; border: 1px solid rgba(52,199,89,0.22); }
+    .status-pending { background: rgba(255,149,0,0.12); color: #e07600; border: 1px solid rgba(255,149,0,0.22); }
+    .status-failed  { background: rgba(255,59,48,0.1); color: #d93025; border: 1px solid rgba(255,59,48,0.2); }
+    .status-free    { background: rgba(0,122,255,0.1); color: var(--primary); border: 1px solid rgba(0,122,255,0.18); }
+
+    .btn-receipt {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.3rem 0.7rem; font-size: 0.78rem; font-weight: 600; color: var(--primary);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .btn-receipt:hover { background: rgba(0,122,255,0.1); }
+
+    /* Mobile scroll hint */
+    @media (max-width: 600px) {
+      .table-glass { overflow-x: auto; }
+    }
+
+    /* Empty state */
+    .empty-pay {
+      text-align: center; padding: 3.5rem 2rem;
+    }
+    .empty-pay .empty-icon { font-size: 3rem; display: block; margin-bottom: 1rem; }
+    .empty-pay h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .empty-pay p  { color: var(--text-muted); font-size: 0.88rem; }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <main class="main-wrapper">
+
+    <!-- Hero -->
+    <section class="page-hero">
+      <div class="hero-badge">💳 Thanh toán</div>
+      <h1>Lịch sử thanh toán</h1>
+      <p>Xem toàn bộ lịch sử giao dịch và hóa đơn các khóa học đã thanh toán.</p>
+    </section>
+
+    <!-- Summary -->
+    <div class="payment-summary">
+      <div class="psum-card">
+        <div class="psum-icon psi-green">💰</div>
+        <div>
+          <div class="psum-val">3.470.000₫</div>
+          <div class="psum-lbl">Tổng đã chi</div>
+        </div>
+      </div>
+      <div class="psum-card">
+        <div class="psum-icon psi-blue">📦</div>
+        <div>
+          <div class="psum-val">4 giao dịch</div>
+          <div class="psum-lbl">Tổng giao dịch</div>
+        </div>
+      </div>
+      <div class="psum-card">
+        <div class="psum-icon psi-orange">🏅</div>
+        <div>
+          <div class="psum-val">3 khóa học</div>
+          <div class="psum-lbl">Đã mua</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History table -->
+    <div class="history-section">
+      <div class="section-header">
+        <h2>Danh sách giao dịch</h2>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterTx('all',this)">Tất cả</button>
+          <button class="filter-btn" onclick="filterTx('success',this)">Thành công</button>
+          <button class="filter-btn" onclick="filterTx('pending',this)">Chờ xử lý</button>
+        </div>
+      </div>
+
+      <div class="table-glass">
+        <table class="payment-table">
+          <thead>
+            <tr>
+              <th>Mã giao dịch</th>
+              <th>Khóa học</th>
+              <th>Ngày</th>
+              <th>Số tiền</th>
+              <th>Phương thức</th>
+              <th>Trạng thái</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="txBody">
+            <tr data-status="free">
+              <td><code>#TX-0001</code></td>
+              <td>Tiếng Anh mất gốc – Khởi đầu từ đầu</td>
+              <td>01/04/2026</td>
+              <td><span class="amount-val free">Miễn phí</span></td>
+              <td>—</td>
+              <td><span class="status-badge status-free">🎁 Miễn phí</span></td>
+              <td></td>
+            </tr>
+            <tr data-status="success">
+              <td><code>#TX-0002</code></td>
+              <td>IELTS 6.5+ – Lộ trình 3 tháng</td>
+              <td>15/04/2026</td>
+              <td><span class="amount-val">1.990.000₫</span></td>
+              <td>💳 Thẻ ngân hàng</td>
+              <td><span class="status-badge status-success">✅ Thành công</span></td>
+              <td><button class="btn-receipt" onclick="alert('Đang tải hóa đơn...')">🧾 Hóa đơn</button></td>
+            </tr>
+            <tr data-status="success">
+              <td><code>#TX-0003</code></td>
+              <td>Luyện phát âm chuẩn theo phương pháp Mỹ</td>
+              <td>20/05/2026</td>
+              <td><span class="amount-val">590.000₫</span></td>
+              <td>📱 MoMo</td>
+              <td><span class="status-badge status-success">✅ Thành công</span></td>
+              <td><button class="btn-receipt" onclick="alert('Đang tải hóa đơn...')">🧾 Hóa đơn</button></td>
+            </tr>
+            <tr data-status="success">
+              <td><code>#TX-0004</code></td>
+              <td>Giao tiếp tự tin trong 60 ngày</td>
+              <td>01/06/2026</td>
+              <td><span class="amount-val">890.000₫</span></td>
+              <td>🏦 Chuyển khoản</td>
+              <td><span class="status-badge status-success">✅ Thành công</span></td>
+              <td><button class="btn-receipt" onclick="alert('Đang tải hóa đơn...')">🧾 Hóa đơn</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    function filterTx(status, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#txBody tr').forEach(row => {
+        row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>
