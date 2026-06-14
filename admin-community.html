@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cộng đồng – LMS EDU PRO</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+
+  <style>
+    /* Community Layout */
+    .community-hero-card {
+      background: linear-gradient(135deg, rgba(0,122,255,0.1), rgba(10,132,255,0.05));
+      border: 1px solid rgba(0,122,255,0.2);
+      border-radius: 16px; padding: 2rem;
+      text-align: center; margin-bottom: 2rem;
+    }
+    .community-hero-card .big-icon { font-size: 3.5rem; margin-bottom: 0.5rem; display: inline-block; }
+    .community-hero-card h1 { font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
+    .community-hero-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* Quick Links */
+    .community-links {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .community-link-card {
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: 16px; padding: 1.5rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      text-decoration: none; transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative; overflow: hidden; color: inherit;
+    }
+    .community-link-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .clc-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .clc-blue   { background: rgba(0,122,255,0.12); }
+    .clc-green  { background: rgba(52,199,89,0.12); }
+    .clc-purple { background: rgba(175,82,222,0.12); }
+    .community-link-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; margin-top:0; }
+    .community-link-card p  { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin:0;}
+    .clc-badge {
+      background: rgba(0,122,255,0.1); color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.15); border-radius: 20px;
+      padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 700;
+      margin-top: 10px;
+    }
+
+    /* Activity feed */
+    .activity-section h2 {
+      font-size: 1.2rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 1.1rem;
+    }
+    .activity-feed { display: flex; flex-direction: column; gap: 0.8rem; }
+    .activity-item {
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: 14px; padding: 1rem 1.3rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .activity-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #fff; font-size: 0.9rem; flex-shrink: 0;
+    }
+    .activity-text { flex: 1; }
+    .activity-text strong { font-size: 0.9rem; color: var(--text); }
+    .activity-text p     { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; margin-bottom: 0; }
+    .activity-time { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+  </style>
+
+</head>
+<body data-theme="light">
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo">
+      <span class="logo-text">LMS EDU PRO</span>
+    </a>
+
+    <!-- Desktop nav (>=1200px) -->
+    <nav class="nav-right" id="navRight" aria-label="Menu chính">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community active">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <!-- Avatar (shown when logged in) -->
+      <a href="#" class="nav-avatar" title="Trang cá nhân">
+        <div class="avatar-circle">U</div>
+        <span class="avatar-name">User</span>
+      </a>
+      <!-- Auth buttons -->
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+
+    <!-- Hamburger (mobile <1200px) -->
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- Mobile dropdown menu -->
+  <nav class="nav-mobile-menu" id="navMobileMenu" aria-label="Menu di động">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community active">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar" title="Trang cá nhân">
+      <div class="avatar-circle">U</div>
+      <span class="avatar-name">User</span>
+    </a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+  <!-- ===== END NAVBAR ===== -->
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <h2>Cộng đồng</h2>
+      <a href="friend-requests.html" >📩 Lời mời kết bạn</a>
+      <a href="friends.html" >👥 Bạn bè</a>
+      <a href="search.html" >🔍 Tìm người dùng</a>
+    </aside>
+    <main class="dashboard-main">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom: 1.5rem;">
+        <button id="desktopSidebarToggle" aria-label="Mở menu"><span></span><span></span><span></span></button>
+      </div>
+
+      <!-- Hero card -->
+      <div class="community-hero-card">
+        <span class="big-icon">👋</span>
+        <h1>Cộng đồng LMS EDU PRO</h1>
+        <p>Nơi giao lưu, kết bạn và học hỏi cùng nhau của tất cả học viên, giáo viên và quản trị viên trong hệ thống.</p>
+      </div>
+
+      <!-- Quick links -->
+      <div class="community-links">
+        <a href="friend-requests.html" class="community-link-card">
+          <div class="clc-icon clc-blue">📩</div>
+          <h3>Lời mời kết bạn</h3>
+          <p>Xem và quản lý các lời mời kết bạn đang chờ duyệt</p>
+          <span class="clc-badge">...</span>
+        </a>
+        <a href="friends.html" class="community-link-card">
+          <div class="clc-icon clc-green">👥</div>
+          <h3>Danh sách bạn bè</h3>
+          <p>Xem toàn bộ danh sách bạn bè đã kết nối trong hệ thống</p>
+          <span class="clc-badge">...</span>
+        </a>
+        <a href="search.html" class="community-link-card">
+          <div class="clc-icon clc-purple">🔍</div>
+          <h3>Tìm người dùng</h3>
+          <p>Tìm kiếm học viên và giáo viên khác để kết nối</p>
+        </a>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="activity-section">
+        <h2>Hoạt động gần đây</h2>
+        <div class="activity-feed">
+          <!-- Feed dynamic -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script src="community-app.js"></script>
+</body>
+</html>

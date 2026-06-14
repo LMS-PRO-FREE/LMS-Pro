@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông tin cá nhân – LMS EDU PRO</title>
+  <meta name="description" content="Trang thông tin cá nhân người dùng.">
+  <link rel="stylesheet" href="style.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+  
+  <style>
+    /* ── Profile layout ── */
+    .profile-layout {
+      width: 100%; max-width: 100%;
+      display: grid; grid-template-columns: 320px 1fr; gap: 1.8rem; align-items: start;
+    }
+    @media (max-width: 800px) { .profile-layout { grid-template-columns: 1fr; } }
+
+    /* ── Avatar card ── */
+    .profile-avatar-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); padding: 2.5rem 1.8rem; text-align: center;
+    }
+    .profile-avatar-wrap { position: relative; display: inline-block; margin-bottom: 1.2rem; }
+    .profile-avatar-big {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; font-weight: 800; color: #fff; margin: 0 auto;
+      box-shadow: 0 8px 28px rgba(0,122,255,0.35);
+    }
+    .avatar-edit-btn {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #0051d5);
+      border: 2px solid rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.75rem; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+    }
+    .profile-name { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 0.3rem; }
+    .profile-role-badge {
+      display: inline-block;
+      background: rgba(0,122,255,0.1); color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.18); border-radius: 20px;
+      padding: 0.2rem 0.8rem; font-size: 0.78rem; font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .profile-email { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.4rem; }
+
+    .profile-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--border); padding-top: 1.2rem; gap: 0.5rem;
+    }
+    .ps-item { text-align: center; }
+    .ps-val {
+      font-size: 1.2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .ps-lbl { font-size: 0.72rem; color: var(--text-muted); }
+
+    .profile-links { margin-top: 1.4rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .profile-link {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.8rem; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 500; color: var(--text); text-decoration: none;
+      transition: all var(--transition);
+    }
+    .profile-link:hover { background: rgba(0,122,255,0.08); color: var(--primary); }
+
+    /* ── Right panel ── */
+    .profile-right { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .info-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); padding: 2rem 2rem;
+    }
+    .info-card-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;
+    }
+    .info-card-header h2 {
+      font-size: 1.1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .btn-edit {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 600; color: var(--primary);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .btn-edit:hover { background: rgba(0,122,255,0.1); }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; }
+    .info-field label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+    .info-field .field-val { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+
+    /* Edit form (hidden by default) */
+    .edit-form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .edit-form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .edit-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 540px) { .edit-form-row { grid-template-columns: 1fr; } }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--primary), #0051d5);
+      color: #fff; border: none; border-radius: 16px;
+      padding: 0.65rem 1.6rem; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(0,122,255,0.3);
+      transition: all var(--transition);
+    }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,122,255,0.4); }
+    .btn-cancel {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 0.65rem 1.2rem; font-weight: 600; font-size: 0.9rem; color: var(--text);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.3); }
+
+    /* Achievement badges */
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .badge-pill {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(0,122,255,0.08); color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.15); border-radius: 20px;
+      padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pill.green  { background: rgba(52,199,89,0.1); color: #28a745; border-color: rgba(52,199,89,0.2); }
+    .badge-pill.orange { background: rgba(255,149,0,0.1); color: #e07600; border-color: rgba(255,149,0,0.2); }
+    .badge-pill.purple { background: rgba(175,82,222,0.1); color: #9b59b6; border-color: rgba(175,82,222,0.2); }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar"></aside>
+    <main class="dashboard-main" style="padding: 2rem;">
+      <div class="dash-header" style="margin-bottom: 2rem;">
+        <div class="dash-header-left" style="display:flex; align-items:center;">
+          <button id="desktopSidebarToggle" aria-label="Mở menu" style="background:none; border:none; font-size:1.5rem; cursor:pointer; margin-right:1rem; color:var(--text);">☰</button>
+          <h1 style="margin:0;">👤 Thông tin cá nhân</h1>
+        </div>
+      </div>
+      <div class="profile-layout" style="margin: 0;">
+
+      <!-- Left: Avatar card -->
+      <div>
+        <div class="profile-avatar-card">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar-big" id="avatarCircle" style="overflow:hidden; display:flex; align-items:center; justify-content:center;">U</div>
+            <div class="avatar-edit-btn" title="Đổi ảnh" onclick="document.getElementById('avatarUpload').click()" style="cursor:pointer; z-index:10;">✏️</div>
+            <input type="file" id="avatarUpload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+          </div>
+          <div class="profile-name" id="profileName">Người dùng</div>
+          <span class="profile-role-badge" id="profileRole">Học viên</span>
+          <div class="profile-email" id="profileEmail">user@lmsedupro.vn</div>
+
+          <div class="profile-stats">
+            <div class="ps-item"><div class="ps-val">3</div><div class="ps-lbl">Khóa học</div></div>
+            <div class="ps-item"><div class="ps-val">47</div><div class="ps-lbl">Bài học</div></div>
+            <div class="ps-item"><div class="ps-val">24</div><div class="ps-lbl">Bạn bè</div></div>
+          </div>
+
+          <div class="profile-links">
+            <a href="current-courses.html" class="profile-link">📚 Khóa học của tôi</a>
+            <a href="payment-history.html" class="profile-link">💳 Lịch sử thanh toán</a>
+            <a href="settings.html" class="profile-link">⚙️ Cài đặt tài khoản</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Info panels -->
+      <div class="profile-right">
+
+        <!-- Personal info (view mode) -->
+        <div class="info-card" id="viewCard">
+          <div class="info-card-header">
+            <h2>👤 Thông tin cá nhân</h2>
+            <button class="btn-edit" onclick="toggleEdit(true)">✏️ Chỉnh sửa</button>
+          </div>
+          <div class="info-grid">
+            <div class="info-field">
+              <label>Họ và tên</label>
+              <div class="field-val" id="viewName">Người dùng</div>
+            </div>
+            <div class="info-field">
+              <label>Tên tài khoản</label>
+              <div class="field-val" id="viewUser">Chưa cập nhật</div>
+            </div>
+            <div class="info-field">
+              <label>Email</label>
+              <div class="field-val" id="viewEmailDisp">user@lmsedupro.vn</div>
+            </div>
+            <div class="info-field">
+              <label>Số điện thoại</label>
+              <div class="field-val" id="viewPhone">Chưa cập nhật</div>
+            </div>
+            <div class="info-field">
+              <label>Ngày sinh</label>
+              <div class="field-val" id="viewDob">Chưa cập nhật</div>
+            </div>
+            <div class="info-field">
+              <label>Trường / Nơi công tác</label>
+              <div class="field-val" id="viewSchool">Chưa cập nhật</div>
+            </div>
+            <div class="info-field">
+              <label>Loại định danh</label>
+              <div class="field-val" id="viewIdType">Chưa cập nhật</div>
+            </div>
+            <div class="info-field">
+              <label>Số định danh</label>
+              <div class="field-val" id="viewIdNum">Chưa cập nhật</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit form (hidden) -->
+        <div class="info-card" id="editCard" style="display:none;">
+          <div class="info-card-header">
+            <h2>✏️ Chỉnh sửa thông tin</h2>
+          </div>
+          <form onsubmit="saveProfile(event)">
+            <div class="edit-form-group">
+              <label>Họ và tên</label>
+              <input type="text" id="editName" placeholder="Họ và Tên" required>
+            </div>
+            <div class="edit-form-group">
+              <label>Tên tài khoản</label>
+              <input type="text" id="editUser" readonly style="cursor:not-allowed; opacity:0.7;">
+            </div>
+            <div class="edit-form-group">
+              <label>Email</label>
+              <input type="email" id="editEmail" placeholder="Email">
+            </div>
+            <div class="edit-form-row">
+              <div class="edit-form-group">
+                <label>Số điện thoại</label>
+                <input type="tel" id="editPhone" placeholder="SĐT">
+              </div>
+              <div class="edit-form-group">
+                <label>Ngày sinh</label>
+                <input type="date" id="editDob">
+              </div>
+            </div>
+            <div class="edit-form-group">
+              <label>Trường / Nơi công tác</label>
+              <input type="text" id="editSchool" placeholder="VD: ĐH HUFLIT">
+            </div>
+            <div class="edit-form-row">
+              <div class="edit-form-group">
+                <label>Loại định danh</label>
+                <select id="editIdType">
+                  <option value="cccd">CMND / CCCD / CC</option>
+                  <option value="passport">Passport</option>
+                  <option value="the_hs">Thẻ HS</option>
+                  <option value="mssv">MSSV</option>
+                </select>
+              </div>
+              <div class="edit-form-group">
+                <label>Số định danh</label>
+                <input type="text" id="editIdNum" placeholder="Nhập số định danh">
+              </div>
+            </div>
+            <div class="edit-form-group" style="margin-top:0.5rem;">
+              <button type="submit" class="btn-save">💾 Lưu thay đổi</button>
+              <button type="button" class="btn-cancel" onclick="toggleEdit(false)">❌ Hủy</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Achievements -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <h2>🏆 Thành tích &amp; Huy hiệu</h2>
+          </div>
+          <div class="badges-grid">
+            <span class="badge-pill">🎓 Học viên mới</span>
+            <span class="badge-pill green">✅ Hoàn thành 10 bài</span>
+            <span class="badge-pill orange">🔥 Chuỗi 7 ngày học</span>
+            <span class="badge-pill purple">💡 Đặt câu hỏi đầu tiên</span>
+            <span class="badge-pill">📚 Đăng ký 3 khóa học</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    // Utility functions for dates
+    window.toInputDate = function(ddmmyyyy) {
+      if (!ddmmyyyy || ddmmyyyy.includes('-')) return ddmmyyyy;
+      const parts = ddmmyyyy.split('/');
+      if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      return ddmmyyyy;
+    };
+    window.toDisplayDate = function(yyyymmdd) {
+      if (!yyyymmdd || yyyymmdd.includes('/')) return yyyymmdd;
+      const parts = yyyymmdd.split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return yyyymmdd;
+    };
+
+    function toggleEdit() {
+      const viewPanel = document.getElementById('viewPanel');
+      const editPanel = document.getElementById('editPanel');
+      const isEditing = viewPanel.style.display === 'none';
+      
+      if (isEditing) {
+        viewPanel.style.display = 'grid';
+        editPanel.style.display = 'none';
+        document.querySelector('.profile-action-btn.btn-outline').textContent = 'Chỉnh sửa thông tin';
+      } else {
+        viewPanel.style.display = 'none';
+        editPanel.style.display = 'block';
+        document.querySelector('.profile-action-btn.btn-outline').textContent = 'Hủy chỉnh sửa';
+        
+        document.getElementById('editName').value = document.getElementById('viewName').textContent;
+        document.getElementById('editUser').value = document.getElementById('viewUser').textContent;
+        const em = document.getElementById('viewEmailDisp').textContent;
+        document.getElementById('editEmail').value = (em === 'Chưa cập nhật') ? '' : em;
+        const ph = document.getElementById('viewPhone').textContent;
+        document.getElementById('editPhone').value = (ph === 'Chưa cập nhật') ? '' : ph;
+        
+        const dob = document.getElementById('viewDob').textContent;
+        document.getElementById('editDob').value = (dob === 'Chưa cập nhật') ? '' : window.toInputDate(dob);
+        
+        const s = document.getElementById('viewSchool').textContent;
+        document.getElementById('editSchool').value = (s === 'Chưa cập nhật') ? '' : s;
+        const num = document.getElementById('viewIdNum').textContent;
+        document.getElementById('editIdNum').value = (num === 'Chưa cập nhật') ? '' : num;
+        
+        const db = JSON.parse(localStorage.getItem('users_db')) || [];
+        const currentUser = sessionStorage.getItem('username');
+        const user = db.find(u => u.user === currentUser);
+        if (user && user.idType) {
+          document.getElementById('editIdType').value = user.idType;
+        } else {
+          document.getElementById('editIdType').value = 'cccd';
+        }
+      }
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const currentUser = sessionStorage.getItem('username');
+      let db = JSON.parse(localStorage.getItem('users_db')) || [];
+      const userIndex = db.findIndex(u => u.user === currentUser);
+      
+      if (userIndex !== -1) {
+        db[userIndex].name = document.getElementById('editName').value.trim();
+        db[userIndex].email = document.getElementById('editEmail').value.trim();
+        db[userIndex].phone = document.getElementById('editPhone').value.trim();
+        db[userIndex].dob = window.toDisplayDate(document.getElementById('editDob').value);
+        db[userIndex].school = document.getElementById('editSchool').value.trim();
+        db[userIndex].idType = document.getElementById('editIdType').value;
+        db[userIndex].idNum = document.getElementById('editIdNum').value.trim();
+        
+        if (window.pendingAvatarUrl) {
+          db[userIndex].avatar = window.pendingAvatarUrl;
+        }
+        
+        sessionStorage.setItem('name', db[userIndex].name);
+        localStorage.setItem('users_db', JSON.stringify(db));
+        
+        let overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0'; overlay.style.left = '0';
+        overlay.style.width = '100vw'; overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        overlay.style.color = '#fff'; overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column'; overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center'; overlay.style.zIndex = '9999';
+        overlay.innerHTML = '<div class="spinner" style="border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #fff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div><style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style><div>Hệ thống đang xác nhận lưu thay đổi...</div>';
+        document.body.appendChild(overlay);
+
+        setTimeout(() => { window.location.reload(); }, 3000);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentUser = sessionStorage.getItem('username');
+      const db = JSON.parse(localStorage.getItem('users_db')) || [];
+      const user = db.find(u => u.user === currentUser);
+      
+      if (user) {
+        const roles = { student: 'Học viên', teacher: 'Giáo viên', admin: 'Quản trị viên' };
+        
+        document.getElementById('profileName').textContent = user.name || 'Người dùng';
+        document.getElementById('avatarCircle').textContent = (user.name || 'U')[0].toUpperCase();
+        document.getElementById('profileRole').textContent = roles[user.role] || user.role;
+        document.getElementById('profileEmail').textContent = user.email || 'Chưa cập nhật';
+        
+        document.getElementById('viewName').textContent = user.name || 'Chưa cập nhật';
+        document.getElementById('viewUser').textContent = user.user || 'Chưa cập nhật';
+        document.getElementById('viewEmailDisp').textContent = user.email || 'Chưa cập nhật';
+        document.getElementById('viewPhone').textContent = user.phone || 'Chưa cập nhật';
+        document.getElementById('viewDob').textContent = user.dob || 'Chưa cập nhật';
+        document.getElementById('viewSchool').textContent = user.school || 'Chưa cập nhật';
+        
+        const idLabels = { cccd: 'CMND / CCCD / CC', passport: 'Passport', the_hs: 'Thẻ HS', mssv: 'MSSV' };
+        document.getElementById('viewIdType').textContent = user.idType ? (idLabels[user.idType] || user.idType.toUpperCase()) : 'Chưa cập nhật';
+        document.getElementById('viewIdNum').textContent = user.idNum || 'Chưa cập nhật';
+
+        if (user.avatar) {
+          document.getElementById('avatarCircle').innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        } else {
+          document.getElementById('avatarCircle').innerHTML = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+        }
+      }
+    });
+
+    async function handleAvatarUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 150;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+          } else {
+            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+          }
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const currentUser = sessionStorage.getItem('username');
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          
+          let overlay = document.getElementById('uploadOverlay');
+          if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'uploadOverlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            overlay.style.color = '#fff';
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '9999';
+            overlay.style.fontSize = '1.5rem';
+            overlay.innerHTML = '<div class="spinner" style="border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #fff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div><style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style><div>Đang tải ảnh lên Supabase... Vui lòng đợi!</div>';
+            document.body.appendChild(overlay);
+          }
+          
+          uploadAvatarToSupabase(dataUrl, currentUser).then(publicUrl => {
+            if (!publicUrl) {
+              if (overlay) overlay.remove();
+              return;
+            }
+            
+            setTimeout(() => {
+              if (overlay) overlay.remove();
+              window.pendingAvatarUrl = publicUrl;
+              document.getElementById('avatarCircle').innerHTML = `<img src="${publicUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            }, 5000);
+          });
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+  <script src="supabase-storage.js"></script>
+</body>
+</html>

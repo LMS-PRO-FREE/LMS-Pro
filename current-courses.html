@@ -1,0 +1,343 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khóa học hiện tại – LMS EDU PRO</title>
+  <meta name="description" content="Danh sách khóa học hiện tại của học sinh.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-hero {
+      text-align: center; padding: 4.5rem 2rem 2.5rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(52,199,89,0.12); color: var(--secondary);
+      border: 1px solid rgba(52,199,89,0.22); border-radius: 20px;
+      padding: 0.3rem 1rem; font-size: 0.82rem; font-weight: 600; margin-bottom: 1.4rem;
+    }
+    .page-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.8rem;
+    }
+    .page-hero p { font-size: 1rem; color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+
+    /* Progress summary */
+    .progress-summary {
+      max-width: 1100px; margin: 0 auto 2.5rem; padding: 0 1.5rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.1rem;
+    }
+    .pscard {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); padding: 1.4rem 1.2rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .pscard-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+    }
+    .psi-blue   { background: rgba(0,122,255,0.12); }
+    .psi-green  { background: rgba(52,199,89,0.12); }
+    .psi-orange { background: rgba(255,149,0,0.12); }
+    .psi-purple { background: rgba(175,82,222,0.12); }
+    .pscard-val {
+      font-size: 1.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .pscard-lbl { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Enrolled courses */
+    .enrolled-section { max-width: 1100px; margin: 0 auto 5rem; padding: 0 1.5rem; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .section-header h2 {
+      font-size: 1.4rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .enrolled-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.4rem; }
+
+    .enrolled-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius); overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .enrolled-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.11); }
+
+    .enrolled-header {
+      padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .course-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0;
+    }
+    .ci-blue   { background: rgba(0,122,255,0.12); }
+    .ci-green  { background: rgba(52,199,89,0.12); }
+    .ci-orange { background: rgba(255,149,0,0.12); }
+    .ci-purple { background: rgba(175,82,222,0.12); }
+    .enrolled-header h3 { font-size: 0.98rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+    .enrolled-header .teacher { font-size: 0.8rem; color: var(--text-muted); }
+
+    .enrolled-body { padding: 1.2rem 1.4rem; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.5rem;
+    }
+    .progress-bar-wrap {
+      height: 8px; background: rgba(0,0,0,0.06); border-radius: 8px; overflow: hidden; margin-bottom: 1.1rem;
+    }
+    .progress-bar {
+      height: 100%; border-radius: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.6s ease;
+    }
+
+    .enrolled-meta {
+      display: flex; gap: 1rem; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;
+    }
+    .enrolled-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .enrolled-footer {
+      padding: 1rem 1.4rem; border-top: 1px solid var(--border);
+      display: flex; gap: 0.7rem;
+    }
+    .btn-continue {
+      flex: 1; padding: 0.55rem;
+      background: linear-gradient(135deg, var(--primary), #0051d5);
+      color: #fff; border: none; border-radius: 14px;
+      font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; text-align: center;
+      box-shadow: 0 3px 12px rgba(0,122,255,0.3); transition: all var(--transition);
+    }
+    .btn-continue:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,122,255,0.4); }
+    .btn-detail {
+      padding: 0.55rem 1rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); border-radius: 14px;
+      font-weight: 600; font-size: 0.88rem; cursor: pointer; color: var(--text); text-decoration: none;
+      transition: all var(--transition);
+    }
+    .btn-detail:hover { background: rgba(255,255,255,0.3); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); box-shadow: var(--glass-shadow);
+      border-radius: var(--radius);
+    }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; display: block; }
+    .empty-state h3 { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.6rem; }
+    .empty-state p  { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .btn-browse {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: linear-gradient(135deg, var(--primary), #0051d5);
+      color: #fff; border: none; border-radius: 20px;
+      padding: 0.7rem 1.6rem; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0,122,255,0.3); transition: all var(--transition);
+    }
+    .btn-browse:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,122,255,0.4); }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <main class="main-wrapper">
+
+    <!-- Hero -->
+    <section class="page-hero">
+      <div class="hero-badge">📖 Khóa học của tôi</div>
+      <h1>Khóa học hiện tại</h1>
+      <p>Tiếp tục hành trình học tập – theo dõi tiến độ và hoàn thành mục tiêu của bạn.</p>
+    </section>
+
+    <!-- Progress summary (shown for logged-in users) -->
+    <div class="progress-summary" id="progressSummary" style="display:none;">
+      <div class="pscard">
+        <div class="pscard-icon psi-blue">📚</div>
+        <div>
+          <div class="pscard-val" id="totalCourses">3</div>
+          <div class="pscard-lbl">Khóa đang học</div>
+        </div>
+      </div>
+      <div class="pscard">
+        <div class="pscard-icon psi-green">✅</div>
+        <div>
+          <div class="pscard-val" id="completedLessons">47</div>
+          <div class="pscard-lbl">Bài đã hoàn thành</div>
+        </div>
+      </div>
+      <div class="pscard">
+        <div class="pscard-icon psi-orange">⏱</div>
+        <div>
+          <div class="pscard-val" id="studyHours">28h</div>
+          <div class="pscard-lbl">Giờ học tích lũy</div>
+        </div>
+      </div>
+      <div class="pscard">
+        <div class="pscard-icon psi-purple">🏆</div>
+        <div>
+          <div class="pscard-val" id="avgProgress">62%</div>
+          <div class="pscard-lbl">Tiến độ trung bình</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enrolled courses -->
+    <section class="enrolled-section">
+      <div class="section-header">
+        <h2>Danh sách khóa học</h2>
+      </div>
+
+      <!-- Logged-in content -->
+      <div id="enrolledContent" style="display:none;">
+        <div class="enrolled-grid">
+          <div class="enrolled-card">
+            <div class="enrolled-header">
+              <div class="course-icon ci-blue">🔤</div>
+              <div>
+                <h3>Tiếng Anh mất gốc – Khởi đầu từ đầu</h3>
+                <span class="teacher">👩‍🏫 Giáo viên: Lê Thị Minh</span>
+              </div>
+            </div>
+            <div class="enrolled-body">
+              <div class="progress-label"><span>Tiến độ học tập</span><span>78%</span></div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:78%"></div></div>
+              <div class="enrolled-meta">
+                <span>📝 62/80 bài</span>
+                <span>⏱ 18 giờ học</span>
+                <span>🗓 Cập nhật: 10/06/2026</span>
+              </div>
+            </div>
+            <div class="enrolled-footer">
+              <a href="#" class="btn-continue">▶ Tiếp tục học</a>
+              <a href="#" class="btn-detail">Chi tiết</a>
+            </div>
+          </div>
+
+          <div class="enrolled-card">
+            <div class="enrolled-header">
+              <div class="course-icon ci-orange">🏆</div>
+              <div>
+                <h3>IELTS 6.5+ – Lộ trình 3 tháng</h3>
+                <span class="teacher">👨‍🏫 Giáo viên: Nguyễn Anh Tuấn</span>
+              </div>
+            </div>
+            <div class="enrolled-body">
+              <div class="progress-label"><span>Tiến độ học tập</span><span>45%</span></div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:45%"></div></div>
+              <div class="enrolled-meta">
+                <span>📝 90/200 bài</span>
+                <span>⏱ 38 giờ học</span>
+                <span>🗓 Cập nhật: 11/06/2026</span>
+              </div>
+            </div>
+            <div class="enrolled-footer">
+              <a href="#" class="btn-continue">▶ Tiếp tục học</a>
+              <a href="#" class="btn-detail">Chi tiết</a>
+            </div>
+          </div>
+
+          <div class="enrolled-card">
+            <div class="enrolled-header">
+              <div class="course-icon ci-green">💬</div>
+              <div>
+                <h3>Giao tiếp tự tin trong 60 ngày</h3>
+                <span class="teacher">👩‍🏫 Giáo viên: Trần Thị Hoa</span>
+              </div>
+            </div>
+            <div class="enrolled-body">
+              <div class="progress-label"><span>Tiến độ học tập</span><span>20%</span></div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:20%"></div></div>
+              <div class="enrolled-meta">
+                <span>📝 30/150 bài</span>
+                <span>⏱ 8 giờ học</span>
+                <span>🗓 Cập nhật: 08/06/2026</span>
+              </div>
+            </div>
+            <div class="enrolled-footer">
+              <a href="#" class="btn-continue">▶ Tiếp tục học</a>
+              <a href="#" class="btn-detail">Chi tiết</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guest / not logged in -->
+      <div id="guestContent" class="empty-state">
+        <span class="empty-icon">🔐</span>
+        <h3>Đăng nhập để xem khóa học của bạn</h3>
+        <p>Bạn cần đăng nhập để truy cập danh sách khóa học đã đăng ký và theo dõi tiến độ học tập.</p>
+        <a href="auth.html" class="btn-browse">🚀 Đăng nhập ngay</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    // Show enrolled content if user is logged in (detected by nav.js state)
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = localStorage.getItem('lms_user');
+      if (user) {
+        document.getElementById('progressSummary').style.display = 'grid';
+        document.getElementById('enrolledContent').style.display = 'block';
+        document.getElementById('guestContent').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
+

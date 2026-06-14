@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng nhập / Đăng ký – LMS EDU PRO</title>
+  <meta name="description" content="Đăng nhập hoặc đăng ký tài khoản LMS EDU PRO.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== AUTH WRAPPER ===== */
+    .auth-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem 4rem;
+    }
+
+    /* ===== AUTH CARD (full Liquid Glass) ===== */
+    .auth-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius);
+      padding: 2.75rem 2.5rem;
+      width: 100%;
+      max-width: 460px;
+      animation: cardIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ===== Brand header inside card ===== */
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+    .auth-brand h1 {
+      font-size: 1.75rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.3rem;
+    }
+    .auth-subtitle {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    /* ===== TABS ===== */
+    .auth-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 14px;
+      padding: 5px;
+    }
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      border: none;
+      background: transparent;
+      font-family: inherit;
+    }
+    .auth-tab.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,122,255,0.35), inset 0 1px 1px rgba(255,255,255,0.25);
+    }
+    .auth-tab:not(.active):hover {
+      background: rgba(0,122,255,0.07);
+      color: var(--primary);
+    }
+
+    /* ===== ERROR BOX ===== */
+    .auth-error {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #ef4444;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+
+    /* ===== FORM GROUPS ===== */
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    /* Required asterisk */
+    .req { color: #ef4444; font-size: 0.8rem; margin-left: 2px; }
+
+    /* ===== FORM ROW (forgot password) ===== */
+    .form-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1.5rem;
+    }
+    .form-row a {
+      font-size: 0.84rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity var(--transition);
+    }
+    .form-row a:hover { opacity: 0.75; text-decoration: underline; }
+
+    /* ===== TWO-COLUMN ROW ===== */
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+    @media (max-width: 480px) { .form-row-2 { grid-template-columns: 1fr; } }
+
+    /* ===== SUBMIT BUTTON ===== */
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: 0 6px 20px rgba(0,122,255,0.35), inset 0 1px 1px rgba(255,255,255,0.25);
+      letter-spacing: 0.2px;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0,122,255,0.42), inset 0 1px 1px rgba(255,255,255,0.25);
+    }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ===== SEPARATOR ===== */
+    .auth-sep {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0.75rem 0 1.25rem;
+    }
+    .auth-sep-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .auth-sep-label::before,
+    .auth-sep-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ===== ROLE CHIPS ===== */
+    .role-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .role-chip {
+      flex: 1 1 calc(50% - 0.6rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.65rem 0.5rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .role-chip input[type=radio] { display: none; }
+    .role-chip:has(input:checked),
+    .role-chip.selected {
+      border-color: var(--primary);
+      background: rgba(0,122,255,0.1);
+      color: var(--primary);
+      box-shadow: 0 4px 16px rgba(0,122,255,0.2), inset 0 1px 1px rgba(255,255,255,0.3);
+    }
+    .role-chip:hover:not(:has(input:checked)) {
+      border-color: rgba(0,122,255,0.35);
+      color: var(--primary);
+    }
+
+    /* ===== EXPIRY TOGGLE BUTTONS ===== */
+    .expiry-toggle-wrap {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+    .expiry-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.45rem 0.85rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 10px;
+      color: var(--text-muted);
+      transition: all var(--transition);
+    }
+    .expiry-toggle-btn:has(input:checked),
+    .expiry-toggle-btn.active-toggle {
+      border-color: var(--primary);
+      background: rgba(0,122,255,0.1);
+      color: var(--primary);
+    }
+    .expiry-toggle-btn input[type=radio] { display: none; }
+
+    /* ===== VERIFICATION SECTION ===== */
+    #idSection {
+      display: none;
+    }
+    #idLabelText { transition: all var(--transition); }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- Brand -->
+      <div class="auth-brand">
+        <h1>LMS EDU PRO</h1>
+      </div>
+      <p class="auth-subtitle">Hệ thống quản lý học tập chuyên nghiệp</p>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin"    onclick="switchTab('login')">Đăng nhập</button>
+        <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
+      </div>
+
+      <!-- Error box -->
+      <div class="auth-error" id="authError"></div>
+
+      <!-- ===== LOGIN FORM ===== -->
+      <div class="auth-panel active" id="panelLogin">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginUser">Tài khoản hoặc Email</label>
+            <input type="text" id="loginUser" placeholder="Nhập tài khoản hoặc email" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPass">Mật khẩu</label>
+            <input type="password" id="loginPass" placeholder="Nhập mật khẩu" required>
+          </div>
+          <div class="form-row">
+            <a href="#">Quên mật khẩu?</a>
+          </div>
+          <button type="submit" class="btn-submit">Đăng nhập</button>
+        </form>
+      </div>
+
+      <!-- ===== REGISTER FORM ===== -->
+      <div class="auth-panel" id="panelRegister">
+        <form id="registerForm">
+
+          <!-- Họ và Tên -->
+          <div class="form-group">
+            <label for="regName">Họ và Tên <span class="req">*</span></label>
+            <input type="text" id="regName" required>
+          </div>
+          <!-- Tài khoản -->
+          <div class="form-group">
+            <label for="regUser">Tài khoản <span class="req">*</span></label>
+            <input type="text" id="regUser" required>
+          </div>
+          <!-- Mật khẩu -->
+          <div class="form-group">
+            <label for="regPass">Mật khẩu <span class="req">*</span></label>
+            <input type="password" id="regPass" required>
+          </div>
+            <div class="form-group">
+              <label for="regConfirmPass">Nhập lại mật khẩu <span class="req">*</span></label>
+              <input type="password" id="regConfirmPass" required>
+            </div>
+          <!-- Quyền hạn -->
+          <div class="form-group">
+            <label>Quyền hạn <span class="req">*</span></label>
+            <div class="role-chips">
+              <label class="role-chip"><input type="radio" name="regRole" value="student" required checked onchange="regUpdateRoleUI()">🎓 Học viên</label>
+              <label class="role-chip"><input type="radio" name="regRole" value="teacher" required onchange="regUpdateRoleUI()">👨‍🏫 Giảng viên</label>
+              
+            </div>
+          </div>
+          
+          <!-- Số điện thoại -->
+          <div class="form-group">
+            <label for="regPhone">Số điện thoại <span class="req">*</span></label>
+            <input type="tel" id="regPhone" required>
+          </div>
+          <!-- Email -->
+          <div class="form-group">
+            <label for="regEmail">Email <span class="req">*</span></label>
+            <input type="email" id="regEmail" required>
+          </div>
+          <!-- Ngày sinh -->
+          <div class="form-group">
+            <label for="regDob">Ngày sinh <span class="req">*</span></label>
+            <input type="date" id="regDob" required>
+          </div>
+          <!-- Giấy tờ định danh -->
+          <div class="form-group">
+            <label>Loại giấy tờ xác minh <span class="req">*</span></label>
+            <div class="role-chips" id="regIdTypeContainer">
+              <label class="role-chip opt-both" id="lbl-cccd"><input type="radio" name="regIdType" value="cccd" required onchange="updateIdUI()">CMND / CCCD / CC</label>
+              <label class="role-chip opt-both" id="lbl-passport"><input type="radio" name="regIdType" value="passport" required onchange="updateIdUI()">Passport</label>
+              <label class="role-chip opt-student" id="lbl-the_hs"><input type="radio" name="regIdType" value="the_hs" required onchange="updateIdUI()">Thẻ HS</label>
+              <label class="role-chip opt-student" id="lbl-mssv"><input type="radio" name="regIdType" value="mssv" required onchange="updateIdUI()">MSSV</label>
+            </div>
+          </div>
+          <div class="form-group" id="regIdNumGroup" style="display:none;">
+            <label id="idLabelText" for="regIdNum">Số giấy tờ <span class="req">*</span></label>
+            <input type="text" id="regIdNum" required>
+          </div>
+          <!-- Hạn sử dụng thẻ -->
+          <div class="form-group" id="regSvExpiryGroup" style="display:none;">
+            <label for="regSvExpiry">Hạn sử dụng thẻ (MM/YYYY) <span class="req">*</span></label>
+            <input type="month" id="regSvExpiry">
+          </div>
+          
+          <!-- Student only fields -->
+          <div id="regStudentOnly">
+            <div class="form-group">
+              <label for="regSchool">Tên trường <span class="req">*</span></label>
+              <input type="text" id="regSchool" required>
+            </div>
+          </div>
+
+            <div style="margin-top:2rem;">
+              <button type="submit" class="btn-submit">Đăng ký tài khoản</button>
+            </div>
+            <div class="auth-switch">
+              Đã có tài khoản? <a href="#" onclick="switchTab('login')">Đăng nhập</a>
+            </div>
+
+</form>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('authError').style.display = 'none';
+    }
+
+    const DASH_MAP = {admin:'admin-dashboard.html', teacher:'teacher-dashboard.html', student:'student-dashboard.html'};
+
+    function showError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+function showSuccess(msg) {
+        const el = document.getElementById('authError');
+        el.textContent = msg;
+        el.style.display = 'block';
+        el.style.background = '#d4edda';
+        el.style.color = '#155724';
+        el.style.border = '1px solid #c3e6cb';
+        setTimeout(() => {
+          el.style.display = 'none';
+          el.style.background = 'rgba(255, 59, 48, 0.1)';
+          el.style.color = '#ff3b30';
+          el.style.border = '1px solid rgba(255, 59, 48, 0.3)';
+        }, 5000);
+      }
+
+    // Clean up 5 demo users from old DB if they exist
+    let oldDb = JSON.parse(localStorage.getItem('users_db'));
+    if (oldDb) {
+      const demoUsers = ["GV01", "HS01", "HS02", "23DH715659", "23DH712663"];
+      const cleanedDb = oldDb.filter(u => !demoUsers.includes(u.user));
+      if (cleanedDb.length < oldDb.length) {
+        localStorage.setItem('users_db', JSON.stringify(cleanedDb));
+      }
+    }
+
+    // Data mock
+    let DEMO_USERS = JSON.parse(localStorage.getItem('users_db'));
+    if (!DEMO_USERS) {
+      DEMO_USERS = [
+        { name: "Mai Quốc Bảo", user: "23DH710401", pass: "Maiquocbao7$", role: "admin", expiry: "Vĩnh viễn", phone: "358818325", email: "23DH710401@st.huflit.edu.vn", idNum: "23DH710401", dob: "07/05/2005", course: "", school: "", svExpiry: "", status: "active", reason: "", adminId: "" },
+        { name: "Nguyễn Thị Cẩm Vân", user: "22DH717712", pass: "Benam7224venn", role: "admin", expiry: "Vĩnh viễn", phone: "", email: "22DH717712@st.huflit.edu.vn", idNum: "22DH717712", dob: "07/02/2004", course: "", school: "", svExpiry: "", status: "active", reason: "", adminId: "" }
+      ];
+      localStorage.setItem('users_db', JSON.stringify(DEMO_USERS));
+    }
+
+    // ---- LOGIN ----
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value.trim();
+
+      if (!user || !pass) {
+        showError('Vui lòng điền đầy đủ thông tin.');
+        return;
+      }
+
+      let role = null;
+      let name = null;
+
+      
+        const loginAttemptsKey = 'login_attempts_' + user;
+        const lockoutKey = 'lockout_until_' + user;
+        
+        let lockoutUntil = localStorage.getItem(lockoutKey);
+        if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
+          const remain = Math.ceil((parseInt(lockoutUntil) - Date.now()) / 60000);
+          showError(`Tài khoản đang bị khóa do nhập sai nhiều lần. Thử lại sau ${remain} phút.`);
+          return;
+        }
+
+        DEMO_USERS = JSON.parse(localStorage.getItem('users_db')) || DEMO_USERS;
+
+        const found = DEMO_USERS.find(u => ((u.user || '').toLowerCase() === user.toLowerCase() || (u.email || '').toLowerCase() === user.toLowerCase()) && u.pass === pass);
+
+        if (!found) {
+          let attempts = parseInt(localStorage.getItem(loginAttemptsKey) || '0') + 1;
+          if (attempts >= 5) {
+            localStorage.setItem(lockoutKey, Date.now() + 5 * 60000); // lock 5 mins
+            localStorage.removeItem(loginAttemptsKey);
+            showError('Đã nhập sai quá 5 lần. Tài khoản bị khóa tạm thời 5 phút.');
+          } else {
+            localStorage.setItem(loginAttemptsKey, attempts);
+            showError(`Sai tài khoản hoặc mật khẩu. Bạn còn ${5 - attempts} lần thử.`);
+          }
+          return;
+        }
+
+        localStorage.removeItem(loginAttemptsKey);
+        localStorage.removeItem(lockoutKey);
+
+        if (found) {
+        if (found.status === 'banned') {
+          showError(`Tài khoản bị cấm! Lý do: ${found.reason || 'Vi phạm hệ thống'}`);
+          return;
+        }
+        role = found.role;
+        name = found.name;
+        sessionStorage.setItem('username', found.user);
+        sessionStorage.setItem('status', found.status);
+
+          if (found.needsConfirmation) {
+            sessionStorage.setItem('needsConfirmation', 'true');
+            window.location.href = 'confirm-info.html';
+            return;
+          }
+
+      } else {
+        const regRole = localStorage.getItem('reg_role_' + user);
+        if (regRole) {
+          role = regRole;
+          name = localStorage.getItem('reg_name_' + user) || user.split('@')[0];
+          sessionStorage.setItem('username', user);
+          sessionStorage.setItem('status', 'active');
+        } else {
+          showError('Sai tài khoản hoặc mật khẩu.');
+          return;
+        }
+      }
+
+      sessionStorage.setItem('role', role);
+      sessionStorage.setItem('originalRole', role);
+      sessionStorage.setItem('name', name);
+      window.location.href = DASH_MAP[role];
+    });
+
+    // ---- REGISTER ----
+    
+      document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('regName').value.trim();
+        const user = document.getElementById('regUser').value.trim();
+        const pass = document.getElementById('regPass').value.trim();
+        const confirmPass = document.getElementById('regConfirmPass').value.trim();
+        
+        if (pass !== confirmPass) {
+          showError('Mật khẩu và Nhập lại mật khẩu không khớp!');
+          return;
+        }
+        
+        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passRegex.test(pass)) {
+          showError('Mật khẩu quá yếu! Phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).');
+          return;
+        }
+
+        const role = document.querySelector('input[name="regRole"]:checked').value;
+        let expiry = 'Vĩnh viễn';
+        if (role === 'student') {
+          const d = new Date();
+          d.setDate(d.getDate() + 30);
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          expiry = `${d.getFullYear()}-${month}-${day}`;
+        }
+        const phone = document.getElementById('regPhone').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const idTypeNode = document.querySelector('input[name="regIdType"]:checked');
+        const idType = idTypeNode ? idTypeNode.value : '';
+        const idNum = document.getElementById('regIdNum').value.trim();
+        function toDisplayDate(d) {
+          if (!d) return '';
+          if (d.includes('-')) {
+            let parts = d.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+          return d;
+        }
+        const dob = toDisplayDate(document.getElementById('regDob').value);
+        const course = '';
+        const school = document.getElementById('regSchool').value.trim();
+        const svExpiryEl = document.getElementById('regSvExpiry');
+        const svExpiry = svExpiryEl ? svExpiryEl.value : '';
+        
+        DEMO_USERS = JSON.parse(localStorage.getItem('users_db')) || DEMO_USERS;
+        if (DEMO_USERS.some(u => u.user === user)) {
+          showError('Tài khoản đã tồn tại!');
+          return;
+        }
+        
+        const isPending = (role === 'teacher');
+        
+        const newUser = {
+          name, user, pass, role,
+          expiry, phone, email, idType, idNum, dob, course, school, svExpiry,
+          status: isPending ? "pending" : "active"
+        };
+        
+        DEMO_USERS.push(newUser);
+        localStorage.setItem('users_db', JSON.stringify(DEMO_USERS));
+        
+        if (isPending) {
+          showSuccess('Đăng ký Giảng viên thành công! Đang chờ Admin duyệt.');
+          document.getElementById('registerForm').reset();
+          if (typeof regUpdateRoleUI === 'function') regUpdateRoleUI();
+          switchTab('login');
+          return;
+        }
+        
+        localStorage.setItem('reg_role_' + user, role);
+        localStorage.setItem('reg_name_' + user, name);
+        sessionStorage.setItem('role', role);
+        sessionStorage.setItem('name', name);
+        sessionStorage.setItem('username', user);
+        sessionStorage.setItem('status', 'active');
+        window.location.href = DASH_MAP[role] || 'Index.html';
+      });
+
+
+    function updateIdUI() {
+      const idTypeNode = document.querySelector('input[name="regIdType"]:checked');
+      const idType = idTypeNode ? idTypeNode.value : '';
+      const labelEl = document.getElementById('idLabelText');
+      const inputEl = document.getElementById('regIdNum');
+      const groupEl = document.getElementById('regIdNumGroup');
+      const cfg = {
+        mssv: { label: 'Mã số học sinh / sinh viên (MSSV/MSHS)', placeholder: 'VD: 2100001234' },
+        cccd: { label: 'Số CMND / CCCD / CC',             placeholder: 'Nhập số CMND / CCCD / CC' },
+        passport: { label: 'Số Passport (Hộ chiếu)',          placeholder: 'Nhập số Passport' },
+        the_hs: { label: 'Số Thẻ học sinh',          placeholder: 'VD: HS2024001' },
+      };
+      const c = cfg[idType];
+      const svExpiryGroup = document.getElementById('regSvExpiryGroup');
+      const svExpiryEl = document.getElementById('regSvExpiry');
+      if (!c) {
+        if(groupEl) groupEl.style.display = 'none';
+        if(svExpiryGroup) svExpiryGroup.style.display = 'none';
+        if(svExpiryEl) svExpiryEl.required = false;
+        return;
+      }
+      if(groupEl) groupEl.style.display = 'block';
+      if(labelEl) labelEl.innerHTML = c.label + ' <span class="req">*</span>';
+      if(inputEl) inputEl.placeholder = c.placeholder;
+      
+      if (idType === 'the_hs' || idType === 'mssv') {
+        if(svExpiryGroup) svExpiryGroup.style.display = 'block';
+        if(svExpiryEl) svExpiryEl.required = true;
+      } else {
+        if(svExpiryGroup) svExpiryGroup.style.display = 'none';
+        if(svExpiryEl) svExpiryEl.required = false;
+        if(svExpiryEl) svExpiryEl.value = '';
+      }
+    }
+
+    function updateExpiryUI() {
+      const typeEl = document.querySelector('input[name="expiryType"]:checked');
+      const dateEl = document.getElementById('regIdExpiry');
+      const labelDate    = document.getElementById('expiryLabelDate');
+      const labelForever = document.getElementById('expiryLabelForever');
+      if (!typeEl) return;
+
+      const isForever = typeEl.value === 'forever';
+      dateEl.style.display = isForever ? 'none' : '';
+      dateEl.required = !isForever;
+      if (isForever) dateEl.value = '';
+
+      const isDateDisabled = document.querySelector('input[name="expiryType"][value="date"]').disabled;
+
+      // Update visual classes
+      labelDate.classList.toggle('active-toggle', !isForever && !isDateDisabled);
+      labelForever.classList.toggle('active-toggle', isForever);
+
+      if (isDateDisabled) {
+        labelDate.style.opacity = '0.45';
+        labelDate.style.cursor = 'not-allowed';
+        labelForever.style.opacity = isForever ? '1' : '0.45';
+        labelForever.style.cursor = isForever ? 'pointer' : 'not-allowed';
+      } else {
+        labelDate.style.opacity = '';
+        labelDate.style.cursor = '';
+        labelForever.style.opacity = '';
+        labelForever.style.cursor = '';
+      }
+    }
+
+    function updateTeacherType() {
+      const ttypeEl = document.querySelector('input[name="teacherType"]:checked');
+      const schoolLabel = document.getElementById('schoolLabelText');
+      const schoolInput = document.getElementById('regSchool');
+      const expiryToggle = document.getElementById('expiryToggle');
+      if (!ttypeEl) return;
+
+      if (ttypeEl.value === 'trung_tam') {
+        schoolLabel.textContent = 'Tên trung tâm';
+        schoolInput.placeholder = 'VD: Trung tâm Anh ngữ ABC';
+      } else if (ttypeEl.value === 'tu_do') {
+        schoolLabel.textContent = 'Nơi công tác (Nếu có)';
+        schoolInput.placeholder = 'Có thể để trống hoặc ghi "Tự do"';
+        schoolInput.required = false; // Tự do thì không bắt buộc có trường
+      } else {
+        schoolLabel.textContent = 'Tên trường';
+        schoolInput.placeholder = 'VD: THPT Nguyễn Du';
+        schoolInput.required = true;
+      }
+
+      const expiryGroup = document.getElementById('expiryGroup');
+      if (expiryGroup) expiryGroup.style.display = '';
+      if (expiryToggle) expiryToggle.style.display = '';
+
+      const isBienChe = (ttypeEl.value === 'bien_che');
+      const radios = document.querySelectorAll('input[name="expiryType"]');
+      radios.forEach(r => {
+        r.disabled = isBienChe;
+        if (isBienChe) {
+          r.checked = (r.value === 'forever');
+        } else {
+          if (r.value === 'date') r.checked = true;
+        }
+      });
+      updateExpiryUI();
+    }
+
+    function updateRoleUI() {
+      const roleEl = document.querySelector('input[name="regRole"]:checked');
+      if (!roleEl) return;
+      const role = roleEl.value;
+      const idTypeEl = document.getElementById('regIdType');
+      const teacherGroup = document.getElementById('teacherTypeGroup');
+
+      const idTypeContainer = document.getElementById('regIdTypeContainer');
+      if (idTypeContainer) {
+        // Reset selection
+        const checkedId = idTypeContainer.querySelector('input[name="regIdType"]:checked');
+        if (checkedId) checkedId.checked = false;
+        
+        idTypeContainer.querySelectorAll('.role-chip').forEach(lbl => {
+          const cls = lbl.className;
+          if (role === 'student') {
+            lbl.style.display = cls.includes('opt-teacher') ? 'none' : '';
+          } else {
+            lbl.style.display = cls.includes('opt-student') ? 'none' : '';
+          }
+        });
+        updateIdUI(); // reset the UI for id number
+      }
+
+      const idSection = document.getElementById('idSection');
+      if (idSection) idSection.style.display = 'block';
+
+      if (teacherGroup) {
+        teacherGroup.style.display = (role === 'teacher') ? 'block' : 'none';
+      }
+
+      const schoolLabel = document.getElementById('schoolLabelText');
+      if (schoolLabel) schoolLabel.textContent = role === 'teacher' ? 'Tên trường / Trung tâm' : 'Tên trường';
+      
+      const regSchool = document.getElementById('regSchool');
+      if (regSchool) regSchool.placeholder = 'VD: THPT Nguyễn Du';
+
+      const expiryToggle = document.getElementById('expiryToggle');
+      if (expiryToggle) expiryToggle.style.display = 'none';
+
+      document.querySelectorAll('input[name="expiryType"]').forEach(r => r.checked = false);
+
+      const expiryGroup = document.getElementById('expiryGroup');
+      const dateEl = document.getElementById('regIdExpiry');
+      
+      if (dateEl) dateEl.value = '';
+
+      if (role === 'teacher') {
+        if (expiryGroup) expiryGroup.style.display = 'none';
+        if (dateEl) dateEl.required = false;
+      } else {
+        if (expiryGroup) expiryGroup.style.display = '';
+        if (dateEl) {
+          dateEl.style.display = '';
+          dateEl.required = true;
+        }
+      }
+    }
+
+    function regUpdateRoleUI() {
+      updateRoleUI();
+    }
+
+    // If already logged in, redirect to dashboard
+    const _role = sessionStorage.getItem('role');
+    if (_role) window.location.replace(DASH_MAP[_role] || 'Index.html');
+  </script>
+</body>
+</html>

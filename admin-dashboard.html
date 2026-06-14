@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng điều khiển Admin – LMS EDU PRO</title>
+  <meta name="description" content="Quản lý hệ thống LMS EDU PRO dành cho Admin.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* ── Table Wrapper ── */
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-shadow);
+      padding: 1px;
+    }
+
+    /* ── Data Table ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+      font-size: 0.9rem;
+      border-radius: calc(var(--radius) - 1px);
+      overflow: hidden;
+    }
+    .data-table th,
+    .data-table td {
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding: 1rem;
+      text-align: left;
+      color: var(--text);
+    }
+    .data-table th {
+      background: rgba(255,255,255,0.25);
+      font-weight: 600;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+    .data-table tbody tr { transition: background var(--transition); }
+    .data-table tbody tr:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── Export / Action Buttons ── */
+    .btn-export {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.3rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition);
+      box-shadow: var(--glass-shadow);
+      font-size: 0.92rem;
+    }
+    .btn-export:hover {
+      background: rgba(255,255,255,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .btn-export.btn-primary-glass {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+    }
+    .btn-export.btn-primary-glass:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,122,255,0.4);
+    }
+
+    /* ── Inline row action buttons ── */
+    .btn-row {
+      border: none;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn-row-edit {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(0,122,255,0.3);
+    }
+    .btn-row-edit:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-row-danger {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(239,68,68,0.3);
+    }
+    .btn-row-danger:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-row-disabled {
+      background: var(--glass-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* ── Role Badge ── */
+    .role-badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .role-badge.admin   { background: rgba(0,122,255,0.14); color: var(--primary); border: 1px solid rgba(0,122,255,0.25); }
+    .role-badge.teacher { background: rgba(52,199,89,0.14); color: #1a9e44; border: 1px solid rgba(52,199,89,0.25); }
+    .role-badge.student { background: rgba(255,149,0,0.14); color: #b86e00; border: 1px solid rgba(255,149,0,0.25); }
+
+    /* ── Avatar circle in table ── */
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.88rem;
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 2px 8px rgba(0,122,255,0.25);
+      flex-shrink: 0;
+    }
+
+    /* ── Dashboard header row ── */
+    .dash-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem; }
+    .dash-header-left  { display:flex; align-items:center; gap:10px; }
+    .dash-header-right { display:flex; gap:1rem; flex-wrap:wrap; }
+
+    /* ── Modals ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    .modal-panel {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      padding: 2.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.5);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.3s cubic-bezier(0.25,1,0.5,1);
+    }
+    .modal-title {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-title-danger {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-form { display:flex; flex-direction:column; gap:1.2rem; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:1rem; margin-top:1rem; }
+
+    .btn-modal-cancel {
+      padding: 0.75rem 1.5rem; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+      color: var(--text); cursor: pointer; font-weight: 600;
+      transition: all var(--transition); font-size: 0.95rem;
+    }
+    .btn-modal-cancel:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+
+    .btn-modal-submit {
+      padding: 0.75rem 1.5rem; border-radius: 20px; border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; cursor: pointer; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+      transition: all var(--transition); font-size: 0.95rem;
+    }
+    .btn-modal-submit:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,122,255,0.4); }
+
+    .btn-modal-submit-danger {
+      padding: 0.75rem 1.5rem; border-radius: 20px; border: none;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff; cursor: pointer; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.35);
+      transition: all var(--transition); font-size: 0.95rem;
+    }
+    .btn-modal-submit-danger:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .modal-user-label {
+      font-weight: 700; color: var(--text);
+      background: rgba(255,255,255,0.18);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.75rem 1rem; font-size: 0.95rem;
+    }
+
+    /* ── Modal animation ── */
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.9) translateY(20px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0);    }
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 1.5rem;
+    }
+    .pagination button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      color: var(--text);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    .pagination button:hover:not(:disabled) {
+      background: var(--primary);
+      color: white;
+    }
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .pagination .page-info {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── Hide scrollbars ── */
+    ::-webkit-scrollbar { display: none; }
+    body, .table-responsive, .dashboard-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    </div>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"            class="nav-link">Trang chủ</a>
+      <a href="about-us.html"         class="nav-link">Về chúng tôi</a>
+      <a href="courses.html"          class="nav-link">Chương trình học</a>
+      <a href="contact.html"          class="nav-link">Liên hệ</a>
+      <a href="admin-community.html"  class="nav-link nav-community">Cộng đồng</a>
+      <a href="admin-dashboard.html"  class="nav-link nav-dashboard active">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"            class="nav-link">Trang chủ</a>
+    <a href="about-us.html"         class="nav-link">Về chúng tôi</a>
+    <a href="courses.html"          class="nav-link">Chương trình học</a>
+    <a href="contact.html"          class="nav-link">Liên hệ</a>
+    <a href="admin-community.html"  class="nav-link nav-community">Cộng đồng</a>
+    <a href="admin-dashboard.html"  class="nav-link nav-dashboard active">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <h2>Quản lý</h2>
+      <a href="manage-users.html"  class="active">👥 Quản lý người dùng</a>
+      <a href="manage-classes.html">📚 Quản lý lớp học</a>
+      <a href="manage-lessons.html">📝 Quản lý bài học</a>
+      <a href="profile.html">👤 Thông tin cá nhân</a>
+      <a href="settings.html">⚙️ Cài đặt</a>
+      <a href="payment-history.html">💳 Lịch sử thanh toán</a>
+      <a href="admin-community.html">🌐 Cộng đồng</a>
+    </aside>
+    <main class="dashboard-main">
+      <div class="dash-header">
+        <div class="dash-header-left">
+          <button id="desktopSidebarToggle" aria-label="Mở menu"><span></span><span></span><span></span></button>
+          <h1>Quản lý người dùng</h1>
+
+        </div>
+        <div class="dash-header-right">
+          <button class="btn-export" onclick="reloadTable(this)" title="Tải lại dữ liệu bảng mới nhất">
+            <span>🔄</span> Tải lại
+          </button>
+          <button class="btn-export btn-primary-glass" onclick="openAddUserModal()">
+            <span>➕</span> Cấp tài khoản mới
+          </button>
+          <button class="btn-export" onclick="exportToExcel()">
+            <span>📊</span> Tải xuống XLSX
+          </button>
+        </div>
+      </div>
+      <p class="text-muted mt-1">Danh sách thông tin người dùng được cập nhật liên tục.</p>
+
+      <!-- Thống kê giấy tờ -->
+      <div id="idStatsContainer" style="display:flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap;"></div>
+
+      <div class="table-responsive">
+        <table class="data-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Họ và Tên</th>
+              <th>Tài khoản</th>
+              <th>Mật khẩu</th>
+              <th>Quyền hạn</th>
+              <th>Hạn dùng</th>
+              <th>Số điện thoại</th>
+              <th>Email</th>
+              <th>Giấy tờ định danh</th>
+              <th>Ngày sinh</th>
+              <th>Tên trường</th>
+              <th>Hạn thẻ SV</th>
+              <th>Trạng thái</th>
+              <th>Lý do</th>
+              <th>Admin xử lý</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Render via JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="paginationControls"></div>
+    </main>
+  </div>
+
+  <!-- Modal Thêm Người Dùng -->
+  <div id="addUserModal" class="modal-overlay">
+    <div class="modal-panel">
+      <h2 class="modal-title">Cấp tài khoản mới</h2>
+      <form id="addUserForm" class="modal-form">
+
+          <!-- Họ và Tên -->
+          <div class="form-group">
+            <label for="addName">Họ và Tên <span class="req">*</span></label>
+            <input type="text" id="addName" required>
+          </div>
+          <!-- Tài khoản -->
+          <div class="form-group">
+            <label for="addUser">Tài khoản <span class="req">*</span></label>
+            <input type="text" id="addUser" required>
+          </div>
+          <!-- Mật khẩu -->
+          <div class="form-group">
+            <label for="addPass">Mật khẩu <span class="req">*</span></label>
+            <input type="text" id="addPass" required>
+          </div>
+          <!-- Quyền hạn -->
+          <div class="form-group">
+            <label>Quyền hạn <span class="req">*</span></label>
+            <div class="role-chips">
+              <label class="role-chip"><input type="radio" name="addRole" value="student" required checked onchange="addUpdateRoleUI()">🎓 Học viên</label>
+              <label class="role-chip"><input type="radio" name="addRole" value="teacher" required onchange="addUpdateRoleUI()">👨‍🏫 Giảng viên</label>
+              <label class="role-chip"><input type="radio" name="addRole" value="admin" required onchange="addUpdateRoleUI()">🛡️ Quản trị</label>
+            </div>
+          </div>
+          <!-- Hạn dùng -->
+          <div class="form-group">
+            <label for="addExpiry">Hạn dùng <span class="req">*</span></label>
+            <input type="date" id="addExpiry">
+          </div>
+          <!-- Số điện thoại -->
+          <div class="form-group">
+            <label for="addPhone">Số điện thoại <span class="req">*</span></label>
+            <input type="tel" id="addPhone">
+          </div>
+          <!-- Email -->
+          <div class="form-group">
+            <label for="addEmail">Email <span class="req">*</span></label>
+            <input type="email" id="addEmail">
+          </div>
+          <!-- Giấy tờ định danh -->
+          <div class="form-group">
+            <label for="addIdNum">Giấy tờ định danh <span class="req">*</span></label>
+            <input type="text" id="addIdNum">
+          </div>
+          <!-- Ngày sinh -->
+          <div class="form-group">
+            <label for="addDob">Ngày sinh <span class="req">*</span></label>
+            <input type="date" id="addDob">
+          </div>
+          
+          <!-- Student only fields -->
+          <div id="addStudentOnly">
+            <div class="form-group">
+              <label for="addCourse">Khóa học / Mã lớp <span class="req">*</span></label>
+              <input type="text" id="addCourse">
+            </div>
+            <div class="form-group">
+              <label for="addSchool">Tên trường <span class="req">*</span></label>
+              <input type="text" id="addSchool">
+            </div>
+            <div class="form-group">
+              <label for="addSvExpiry">Hạn thẻ HS/SV (MM/YYYY) <span class="req">*</span></label>
+              <input type="month" id="addSvExpiry" placeholder="MM/YYYY">
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" onclick="closeAddUserModal()">Hủy</button>
+            <button type="submit" class="btn-modal-submit">Cấp mới tài khoản</button>
+          </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Sửa Người Dùng -->
+  <div id="editUserModal" class="modal-overlay">
+    <div class="modal-panel" style="max-width: 700px;">
+      <h2 class="modal-title">Sửa thông tin tài khoản</h2>
+      <form id="editUserForm" class="modal-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label for="editName">Họ và Tên <span class="req">*</span></label>
+            <input type="text" id="editName" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="form-group">
+            <label for="editUser">Tên tài khoản (Không sửa)</label>
+            <input type="text" id="editUser" placeholder="Tên tài khoản" readonly style="cursor:not-allowed; opacity:0.7;">
+          </div>
+          <div class="form-group">
+            <label for="editPass">Mật khẩu</label>
+            <input type="text" id="editPass" placeholder="Để trống nếu không đổi">
+          </div>
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input type="email" id="editEmail" placeholder="Email">
+          </div>
+          <div class="form-group">
+            <label for="editPhone">Số điện thoại</label>
+            <input type="text" id="editPhone" placeholder="SĐT">
+          </div>
+          <div class="form-group">
+            <label for="editDob">Ngày sinh</label>
+            <input type="date" id="editDob">
+          </div>
+          <div class="form-group">
+            <label for="editIdNum">Giấy tờ định danh</label>
+            <input type="text" id="editIdNum" placeholder="CCCD/MSSV/Mã GV">
+          </div>
+          <div class="form-group">
+            <label for="editSchool">Tên trường/Công tác</label>
+            <input type="text" id="editSchool" placeholder="Nơi học/công tác">
+          </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Khóa học / Mã lớp đã tham gia</label>
+              <div id="editCourseList" style="padding: 0.8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; line-height: 1.5;">
+                <!-- Dữ liệu sẽ được load qua JS -->
+              </div>
+            </div>
+          <div class="form-group">
+            <label for="editSvExpiry">Hạn thẻ SV (nếu có)</label>
+            <input type="text" id="editSvExpiry" placeholder="MM/YY">
+          </div>
+          <div class="form-group">
+            <label for="editExpiry">Hạn dùng tài khoản</label>
+            <input type="text" id="editExpiry" placeholder="VD: Vĩnh viễn hoặc YYYY-MM-DD">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Vai trò <span class="req">*</span></label>
+          <div class="role-chips">
+            <label class="role-chip"><input type="radio" name="editRole" value="student" required>👨‍🎓 Học viên</label>
+            <label class="role-chip"><input type="radio" name="editRole" value="teacher" required>👨‍🏫 Giảng viên</label>
+            <label class="role-chip"><input type="radio" name="editRole" value="admin" required>🛡️ Quản trị</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" onclick="closeEditUserModal()">Hủy</button>
+          <button type="submit" class="btn-modal-submit">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Xử Lý Trạng Thái -->
+  <div id="processUserModal" class="modal-overlay">
+    <div class="modal-panel">
+      <h2 class="modal-title-danger">Xử lý tài khoản</h2>
+      <p id="processUserName" class="modal-user-label"></p>
+      <form id="processUserForm" class="modal-form" style="margin-top:1rem;">
+        <div class="form-group">
+          <label>Hành động <span class="req">*</span></label>
+          <div class="role-chips" style="flex-direction: column; gap:0.4rem;">
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="active" required checked>🟢 Hoạt động bình thường</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="pending" required>⏳ Chờ xác minh (Chưa được duyệt)</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="suspended" required>🟡 Tạm ngưng (Không truy cập lớp)</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="banned" required>🔴 Cấm vĩnh viễn (Cấm đăng nhập)</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="failed" required>❌ Xác minh thất bại (Từ chối)</label>
+            <label class="role-chip" style="justify-content:flex-start;"><input type="radio" name="processAction" value="delete" required>🗑️ Xóa tài khoản (Mất dữ liệu)</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="processReason">Lý do xử lý <span class="req">*</span></label>
+          <input type="text" id="processReason" placeholder="VD: Vi phạm nội quy..." required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" onclick="closeProcessModal()">Hủy</button>
+          <button type="submit" class="btn-modal-submit-danger">Xác nhận</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    function toDisplayDate(d) { if(!d) return ''; const parts = d.split('-'); return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d; }
+    function toInputDate(d) { if(!d || !d.includes('/')) return d; const parts = d.split('/'); return `${parts[2]}-${parts[1]}-${parts[0]}`; }
+
+    let oldDb = JSON.parse(localStorage.getItem('users_db'));
+    if (oldDb) {
+      const demoUsers = ["GV01", "HS01", "HS02", "23DH715659", "23DH712663"];
+      const cleanedDb = oldDb.filter(u => !demoUsers.includes(u.user));
+      if (cleanedDb.length < oldDb.length) {
+        localStorage.setItem('users_db', JSON.stringify(cleanedDb));
+      }
+    }
+
+    let userList = JSON.parse(localStorage.getItem('users_db'));
+    if (!userList) {
+      userList = [
+        { name: "Mai Quốc Bảo", user: "23DH710401", pass: "Maiquocbao7$", role: "admin", expiry: "Vĩnh viễn", phone: "358818325", email: "23DH710401@st.huflit.edu.vn", idNum: "23DH710401", dob: "07/05/2005", course: "", school: "", svExpiry: "", status: "active", reason: "Admin hệ thống", adminId: "" },
+        { name: "Nguyễn Thị Cẩm Vân", user: "22DH717712", pass: "Benam7224venn", role: "admin", expiry: "Vĩnh viễn", phone: "", email: "22DH717712@st.huflit.edu.vn", idNum: "22DH717712", dob: "07/02/2004", course: "", school: "", svExpiry: "", status: "active", reason: "Admin hệ thống", adminId: "" }
+      ];
+      localStorage.setItem('users_db', JSON.stringify(userList));
+    }
+
+    function saveDB() {
+      localStorage.setItem('users_db', JSON.stringify(userList));
+    }
+
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    const ID_LABELS = { cccd: 'CCCD', passport: 'Passport', the_hs: 'Thẻ HS', mssv: 'MSSV', cmnd: 'CMND' };
+
+    function renderTable() {
+      const tbody = document.getElementById('usersTableBody');
+      const paginationControls = document.getElementById('paginationControls');
+      const statsContainer = document.getElementById('idStatsContainer');
+      
+      tbody.innerHTML = '';
+      paginationControls.innerHTML = '';
+      
+      if (statsContainer) {
+        let stats = { cccd: 0, passport: 0, the_hs: 0, mssv: 0, cmnd: 0, other: 0 };
+        (userList || []).forEach(u => {
+           if (u.idType && stats[u.idType] !== undefined) stats[u.idType]++;
+           else if (u.idNum) stats.other++;
+        });
+        let statsHtml = '';
+        for (let key in stats) {
+           if (stats[key] > 0 || key !== 'other') {
+             statsHtml += `<div style="background: var(--glass-bg); border: 1px solid var(--border); padding: 1rem 1.5rem; border-radius: 12px; flex: 1; min-width: 120px; text-align: center;">
+               <div style="font-size: 0.9rem; color: var(--text-muted);">${ID_LABELS[key] || 'Khác'}</div>
+               <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary); margin-top: 0.5rem;">${stats[key]}</div>
+             </div>`;
+           }
+        }
+        statsContainer.innerHTML = statsHtml;
+      }
+
+      if (!userList || userList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Chưa có dữ liệu người dùng.</td></tr>';
+        return;
+      }
+
+      const totalPages = Math.ceil(userList.length / rowsPerPage);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      const pageData = userList.slice(startIndex, endIndex);
+
+      const currentUsername = sessionStorage.getItem('username');
+      const isSuperAdmin = (currentUsername === '23DH710401');
+
+      pageData.forEach(u => {
+        let displayPass = u.pass;
+        let displayUser = u.user;
+        let isPeerAdmin = (u.role === 'admin' && u.user !== currentUsername);
+
+        if (!isSuperAdmin && isPeerAdmin) {
+          displayPass = '***';
+          displayUser = '***';
+        }
+
+        let editButtonHtml = '';
+        if (!isSuperAdmin && isPeerAdmin) {
+          editButtonHtml = `<button disabled class="btn-row btn-row-disabled" title="Không có quyền sửa Admin khác">🚫 Khóa</button>`;
+        } else {
+          editButtonHtml = `<button onclick="editUser('${u.user}')" class="btn-row btn-row-edit">✏️ Sửa</button>`;
+        }
+
+        let processButtonHtml = '';
+        if (u.user !== currentUsername) {
+          if (isSuperAdmin || u.role !== 'admin') {
+            processButtonHtml = `<button onclick="openProcessModal('${u.user}')" class="btn-row btn-row-danger">🛡️ Xử lý</button>`;
+          }
+        }
+
+        const initial = u.name ? u.name.charAt(0).toUpperCase() : 'U';
+        const avatarHtml = u.avatar ? `<div class="user-avatar" style="padding:0; overflow:hidden;"><img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>` : `<div class="user-avatar">${initial}</div>`;
+        
+        let formattedIdNum = u.idNum || '';
+        if (u.idType) {
+          const lbl = ID_LABELS[u.idType] || u.idType.toUpperCase();
+          formattedIdNum = `<span class="badge" style="background:var(--border);color:var(--text);padding:2px 6px;border-radius:4px;font-size:0.75rem;margin-right:4px;">${lbl}</span>${formattedIdNum}`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${avatarHtml}</td>
+          <td>${u.name}</td>
+          <td>${displayUser}</td>
+          <td>${displayPass}</td>
+          <td><span class="role-badge ${u.role}">${u.role}</span></td>
+          <td>${u.expiry}</td>
+          <td>${u.phone}</td>
+          <td>${u.email}</td>
+          <td>${formattedIdNum}</td>
+          <td>${toDisplayDate(u.dob) || ''}</td>
+          <td>${u.school}</td>
+          <td>${u.svExpiry}</td>
+          <td>${u.status}</td>
+          <td>${u.reason}</td>
+          <td>${u.adminId}</td>
+          <td>
+            <div style="display:flex; gap:6px; align-items:center;">
+              ${editButtonHtml}
+              ${processButtonHtml}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Render Pagination Buttons
+      const btnPrev = document.createElement('button');
+      btnPrev.textContent = 'Trước';
+      btnPrev.disabled = (currentPage === 1);
+      btnPrev.onclick = () => { currentPage--; renderTable(); };
+
+      const spanInfo = document.createElement('span');
+      spanInfo.className = 'page-info';
+      spanInfo.textContent = `Trang ${currentPage} / ${totalPages} (Tổng: ${userList.length})`;
+
+      const btnNext = document.createElement('button');
+      btnNext.textContent = 'Sau';
+      btnNext.disabled = (currentPage === totalPages);
+      btnNext.onclick = () => { currentPage++; renderTable(); };
+
+      paginationControls.appendChild(btnPrev);
+      paginationControls.appendChild(spanInfo);
+      paginationControls.appendChild(btnNext);
+    }
+
+    let currentEditUserId = null;
+
+    function editUser(userId) {
+      const userObj = userList.find(u => u.user === userId);
+      if (!userObj) return;
+
+      const currentUsername = sessionStorage.getItem('username');
+      const isSuperAdmin = (currentUsername === '23DH710401');
+
+      if (!isSuperAdmin && userObj.role === 'admin' && userObj.user !== currentUsername) {
+        alert("Bạn không có quyền chỉnh sửa tài khoản Admin khác!");
+        return;
+      }
+
+      currentEditUserId = userId;
+      document.getElementById('editName').value = userObj.name || '';
+      document.getElementById('editUser').value = userObj.user || '';
+      document.getElementById('editEmail').value = userObj.email || '';
+      document.getElementById('editPhone').value = userObj.phone || '';
+      document.getElementById('editDob').value = toInputDate(userObj.dob);
+      document.getElementById('editIdNum').value = userObj.idNum || '';
+      document.getElementById('editSchool').value = userObj.school || '';
+      
+      const classesDb = JSON.parse(localStorage.getItem('classes_db')) || [];
+      const userClasses = classesDb.filter(c => c.enrolled && c.enrolled.includes(userId));
+      let classHtml = '';
+      if (userClasses.length > 0) {
+        classHtml = userClasses.map(c => `<div style="margin-bottom:4px;"><span style="font-weight:600; color:var(--primary);">[${c.courseId}/${c.id}]</span> ${c.name}</div>`).join('');
+      } else {
+        classHtml = '<span class="text-muted">Chưa tham gia lớp nào</span>';
+      }
+      document.getElementById('editCourseList').innerHTML = classHtml;
+      
+      document.getElementById('editSvExpiry').value = userObj.svExpiry || '';
+      document.getElementById('editExpiry').value = userObj.expiry || '';
+
+      if (!isSuperAdmin && userObj.role === 'admin' && userObj.user !== currentUsername) {
+        document.getElementById('editPass').value = '';
+        document.getElementById('editPass').placeholder = 'Mật khẩu (Đã ẩn)';
+      } else {
+        document.getElementById('editPass').value = userObj.pass;
+        document.getElementById('editPass').placeholder = 'Để trống nếu không đổi';
+      }
+
+      document.querySelectorAll(`input[name="editRole"]`).forEach(r => r.checked = false);
+      const roleRadio = document.querySelector(`input[name="editRole"][value="${userObj.role}"]`);
+      if(roleRadio) roleRadio.checked = true;
+
+      document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').style.display = 'none';
+      currentEditUserId = null;
+    }
+
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userObj = userList.find(u => u.user === currentEditUserId);
+      if (userObj) {
+        userObj.name = document.getElementById('editName').value.trim();
+        userObj.email = document.getElementById('editEmail').value.trim();
+        userObj.phone = document.getElementById('editPhone').value.trim();
+        userObj.dob = toDisplayDate(document.getElementById('editDob').value);
+        userObj.idNum = document.getElementById('editIdNum').value.trim();
+        userObj.school = document.getElementById('editSchool').value.trim();
+        userObj.svExpiry = document.getElementById('editSvExpiry').value.trim();
+        userObj.expiry = document.getElementById('editExpiry').value.trim();
+
+        const newPass = document.getElementById('editPass').value.trim();
+        if (newPass !== '') { userObj.pass = newPass; }
+        const roleEl = document.querySelector('input[name="editRole"]:checked');
+        if(roleEl) userObj.role = roleEl.value;
+        userObj.adminId = sessionStorage.getItem('name') || "Admin";
+        userObj.reason = "Admin cập nhật thông tin";
+        saveDB();
+        renderTable();
+        closeEditUserModal();
+        alert('Cập nhật thông tin thành công!');
+      }
+    });
+
+    let currentProcessUserId = null;
+
+    function openProcessModal(userId) {
+      const userObj = userList.find(u => u.user === userId);
+      if (!userObj) return;
+      currentProcessUserId = userId;
+      document.getElementById('processUserName').textContent = `Tài khoản: ${userObj.user}`;
+      document.getElementById('processReason').value = userObj.reason || '';
+
+      document.querySelectorAll(`input[name="processAction"]`).forEach(r => r.checked = false);
+      let actionVal = userObj.status || 'active';
+      const actionRadio = document.querySelector(`input[name="processAction"][value="${actionVal}"]`);
+      if(actionRadio) actionRadio.checked = true;
+
+      document.getElementById('processUserModal').style.display = 'flex';
+    }
+
+    function closeProcessModal() {
+      document.getElementById('processUserModal').style.display = 'none';
+      currentProcessUserId = null;
+    }
+
+    document.getElementById('processUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userObj = userList.find(u => u.user === currentProcessUserId);
+      if (userObj) {
+        const actionEl = document.querySelector('input[name="processAction"]:checked');
+        const action = actionEl ? actionEl.value : 'active';
+        const reason = document.getElementById('processReason').value.trim();
+
+        if (action === 'delete') {
+          customConfirm('Bạn có chắc chắn muốn XÓA HOÀN TOÀN tài khoản này? Mọi dữ liệu sẽ bị mất và không thể khôi phục!').then((res) => { if(res) {  
+            userList = userList.filter(u => u.user !== currentProcessUserId);
+            alert('Đã xóa tài khoản thành công!');
+            } }) else { return; }
+        } else {
+          userObj.status = action;
+          userObj.reason = reason;
+          alert('Cập nhật trạng thái thành công!');
+        }
+        
+        sortUsers();
+        saveDB();
+        renderTable();
+        closeProcessModal();
+      }
+    });
+
+    function exportToExcel() {
+      const table = document.getElementById('usersTable');
+      const workbook = XLSX.utils.table_to_book(table, { sheet: "Users" });
+      XLSX.writeFile(workbook, 'Danh_Sach_Nguoi_Dung.xlsx');
+    }
+
+    function reloadTable(btn) {
+      const db = localStorage.getItem('users_db');
+      if (db) {
+        userList = JSON.parse(db);
+      }
+      renderTable();
+      if (btn) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span>✅</span> Đã tải lại';
+        setTimeout(() => { btn.innerHTML = originalHtml; }, 1500);
+      }
+    }
+
+    function openAddUserModal() {
+      document.getElementById('addUserModal').style.display = 'flex';
+    }
+    function closeAddUserModal() {
+      document.getElementById('addUserModal').style.display = 'none';
+    }
+
+    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('addName').value.trim();
+      const user = document.getElementById('addUser').value.trim();
+      const pass = document.getElementById('addPass').value.trim();
+      const role = document.querySelector('input[name="addRole"]:checked').value;
+      const expiry = document.getElementById('addExpiry').value;
+      const phone = document.getElementById('addPhone').value.trim();
+      const email = document.getElementById('addEmail').value.trim();
+      const idNum = document.getElementById('addIdNum').value.trim();
+      const dob = document.getElementById('addDob').value;
+      const course = document.getElementById('addCourse').value.trim();
+      const school = document.getElementById('addSchool').value.trim();
+      const svExpiry = document.getElementById('addSvExpiry').value;
+      
+      if (userList.some(u => u.user === user)) {
+        alert('Tài khoản đã tồn tại!');
+        return;
+      }
+      
+      const currentUser = sessionStorage.getItem('name') || 'Admin';
+      userList.unshift({
+        name, user, pass, role,
+        expiry, phone, email, idNum, dob, course, school, svExpiry,
+        status: "active",
+        reason: "Admin cấp mới", adminId: currentUser, needsConfirmation: true
+      });
+      
+      saveDB();
+      renderTable();
+      closeAddUserModal();
+      this.reset();
+      if (typeof addUpdateRoleUI === 'function') addUpdateRoleUI();
+      alert('Đã cấp tài khoản "' + user + '" thành công!');
+    });
+
+    function sortUsers() {
+      const order = { 'pending': 1, 'active': 2, 'suspended': 3, 'banned': 4, 'failed': 5 };
+      userList.sort((a, b) => {
+        const rankA = order[a.status] || 99;
+        const rankB = order[b.status] || 99;
+        return rankA - rankB;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      sortUsers();
+      renderTable();
+    });
+
+    window.addEventListener('click', function(e) {
+      if (e.target.id === 'addUserModal')     closeAddUserModal();
+      if (e.target.id === 'editUserModal')    closeEditUserModal();
+      if (e.target.id === 'processUserModal') closeProcessModal();
+    });
+
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'users_db') {
+        userList = JSON.parse(e.newValue) || userList;
+        sortUsers();
+        renderTable();
+      }
+    });
+    
+    // Add logic for addUpdateRoleUI if needed inside Add User Modal
+    function addUpdateRoleUI() {
+       // Optional UI update for adding users
+    }
+  </script>
+</body>
+</html>

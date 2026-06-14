@@ -1,0 +1,360 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Về chúng tôi – LMS EDU PRO</title>
+  <meta name="description" content="Tìm hiểu về LMS EDU PRO – hệ thống quản lý học tập chuyên nghiệp.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── About Us page styles ── */
+    .about-hero {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+      position: relative;
+    }
+    .about-hero .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(0,122,255,0.12);
+      color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.2);
+      border-radius: 20px;
+      padding: 0.3rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .about-hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    .about-hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    /* Stats row */
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.2rem;
+      max-width: 860px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+    }
+    .stat-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+    .stat-num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+    .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+    /* Mission + Vision */
+    .about-section {
+      max-width: 1100px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+    }
+    .about-section h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.4rem;
+    }
+    .mission-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius);
+      padding: 2rem 1.8rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .mission-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+    .mission-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.1rem;
+    }
+    .icon-blue  { background: rgba(0,122,255,0.12); }
+    .icon-green { background: rgba(52,199,89,0.12); }
+    .icon-orange{ background: rgba(255,149,0,0.12); }
+    .icon-purple{ background: rgba(175,82,222,0.12);}
+    .mission-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.6rem; }
+    .mission-card p  { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* Team */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.4rem;
+    }
+    .team-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .team-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+    .team-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; font-weight: 700; color: #fff;
+      margin: 0 auto 1rem;
+      box-shadow: 0 6px 20px rgba(0,122,255,0.3);
+    }
+    .team-card h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+    .team-card .role-badge {
+      display: inline-block;
+      background: rgba(0,122,255,0.12);
+      color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.2);
+      border-radius: 20px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 0.7rem;
+    }
+    .team-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* CTA banner */
+    .about-cta {
+      max-width: 1100px;
+      margin: 0 auto 5rem;
+      padding: 0 1.5rem;
+    }
+    .cta-glass {
+      background: linear-gradient(135deg, rgba(0,122,255,0.12), rgba(52,199,89,0.08));
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(0,122,255,0.2);
+      box-shadow: var(--glass-shadow);
+      border-radius: calc(var(--radius) + 6px);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .cta-glass h2 {
+      font-size: 1.8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.8rem;
+    }
+    .cta-glass p { color: var(--text-muted); margin-bottom: 1.8rem; font-size: 1rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: linear-gradient(135deg, var(--primary), #0051d5);
+      color: #fff; border: none; border-radius: 20px;
+      padding: 0.75rem 1.8rem; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+      transition: all var(--transition);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,122,255,0.45); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      color: var(--text); border-radius: 20px;
+      padding: 0.75rem 1.8rem; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; text-decoration: none;
+      transition: all var(--transition);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+</head>
+<body data-theme="light">
+
+  <header class="navbar">
+    <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html"    class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link active">Về chúng tôi</a>
+      <a href="courses.html"  class="nav-link">Chương trình học</a>
+      <a href="contact.html"  class="nav-link">Liên hệ</a>
+      <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+      <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar" title="Trang cá nhân"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+      <a href="#" class="btn-auth-logout">Đăng xuất</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Mở menu"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html"    class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link active">Về chúng tôi</a>
+    <a href="courses.html"  class="nav-link">Chương trình học</a>
+    <a href="contact.html"  class="nav-link">Liên hệ</a>
+    <a href="#"             class="nav-link nav-community">Cộng đồng</a>
+    <a href="#"             class="nav-link nav-dashboard">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">Đăng nhập / Đăng ký</a>
+    <a href="#" class="btn-auth-logout">Đăng xuất</a>
+  </nav>
+
+  <main class="main-wrapper">
+
+    <!-- Hero -->
+    <section class="about-hero">
+      <div class="hero-badge">🎓 Về chúng tôi</div>
+      <h1>Nền tảng học tập<br>tiếng Anh hàng đầu</h1>
+      <p>LMS EDU PRO là hệ thống quản lý học tập chuyên nghiệp, được thiết kế để hỗ trợ học sinh, giáo viên và quản trị viên trong hành trình chinh phục tiếng Anh hiệu quả và thú vị.</p>
+    </section>
+
+    <!-- Stats -->
+    <div class="about-stats">
+      <div class="stat-card">
+        <span class="stat-num">10,000+</span>
+        <span class="stat-label">Học viên đang học</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">200+</span>
+        <span class="stat-label">Khóa học chất lượng</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">50+</span>
+        <span class="stat-label">Giáo viên chuyên nghiệp</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">98%</span>
+        <span class="stat-label">Học viên hài lòng</span>
+      </div>
+    </div>
+
+    <!-- Mission & Values -->
+    <section class="about-section">
+      <h2>Sứ mệnh &amp; Giá trị cốt lõi</h2>
+      <div class="mission-grid">
+        <div class="mission-card">
+          <div class="mission-icon icon-blue">🎯</div>
+          <h3>Sứ mệnh</h3>
+          <p>Mang lại cơ hội học tiếng Anh chất lượng cao cho mọi học viên tại Việt Nam, bất kể điều kiện và hoàn cảnh.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon icon-green">🌱</div>
+          <h3>Tầm nhìn</h3>
+          <p>Trở thành nền tảng học tập trực tuyến được tin dùng nhất Đông Nam Á vào năm 2030, kết nối hàng triệu người học.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon icon-orange">💡</div>
+          <h3>Đổi mới</h3>
+          <p>Ứng dụng công nghệ AI tiên tiến và phương pháp giảng dạy hiện đại để tối ưu hóa trải nghiệm học tập cá nhân hóa.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon icon-purple">🤝</div>
+          <h3>Cộng đồng</h3>
+          <p>Xây dựng cộng đồng học tập năng động, nơi học viên và giáo viên cùng nhau phát triển và chia sẻ kiến thức.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section class="about-section">
+      <h2>Đội ngũ sáng lập</h2>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-avatar">A</div>
+          <h3>Nguyễn Anh Tuấn</h3>
+          <span class="role-badge">CEO &amp; Founder</span>
+          <p>10+ năm kinh nghiệm trong lĩnh vực giáo dục trực tuyến và phát triển sản phẩm công nghệ.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">L</div>
+          <h3>Lê Thị Minh</h3>
+          <span class="role-badge">Head of Education</span>
+          <p>Chuyên gia thiết kế chương trình học, IELTS 8.5, từng giảng dạy tại Hà Nội và TP.HCM.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">P</div>
+          <h3>Phạm Quốc Bảo</h3>
+          <span class="role-badge">CTO</span>
+          <p>Kiến trúc sư hệ thống với chuyên môn về AI/ML và xây dựng nền tảng EdTech hiệu năng cao.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">T</div>
+          <h3>Trần Thị Hoa</h3>
+          <span class="role-badge">Head of Design</span>
+          <p>Designer với tầm nhìn UI/UX đẳng cấp, tạo ra những giao diện vừa đẹp vừa trực quan.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="about-cta">
+      <div class="cta-glass">
+        <h2>Sẵn sàng bắt đầu hành trình học tập?</h2>
+        <p>Tham gia cùng hơn 10,000 học viên đang chinh phục tiếng Anh mỗi ngày trên LMS EDU PRO.</p>
+        <div class="cta-btns">
+          <a href="auth.html" class="btn-primary">🚀 Đăng ký miễn phí</a>
+          <a href="courses.html" class="btn-ghost">📚 Khám phá khóa học</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>Nền tảng học tập trực tuyến chuyên nghiệp.</p></div>
+      <div class="footer-col"><h3>Liên kết nhanh</h3><a href="about-us.html">Về chúng tôi</a><a href="courses.html">Chương trình học</a><a href="contact.html">Liên hệ</a></div>
+      <div class="footer-col"><h3>Liên hệ</h3><p>Email: support@lmsedupro.vn</p><p>SĐT: 0123 456 789</p></div>
+    </div>
+    <div class="footer-bottom">© 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+</body>
+</html>
+

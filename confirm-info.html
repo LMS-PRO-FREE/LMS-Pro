@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác nhận thông tin - LMS EDU PRO</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+  <style>
+    body {
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem 0;
+    }
+    .confirm-container {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: var(--glass-shadow);
+    }
+    .confirm-title {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .confirm-desc {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .req { color: #ff3b30; }
+    input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text);
+      font-family: inherit;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="confirm-container">
+    <h2 class="confirm-title">Xác nhận thông tin tài khoản</h2>
+    <p class="confirm-desc">Tài khoản của bạn được cấp bởi Admin. Vui lòng kiểm tra và bổ sung đầy đủ thông tin bắt buộc trước khi bắt đầu sử dụng hệ thống.</p>
+    
+    <form id="confirmForm">
+      <!-- Họ và Tên -->
+      <div class="form-group">
+        <label for="confName">Họ và Tên <span class="req">*</span></label>
+        <input type="text" id="confName" required>
+      </div>
+      <!-- Tài khoản -->
+      <div class="form-group">
+        <label for="confUser">Tài khoản <span class="req">*</span></label>
+        <input type="text" id="confUser" required readonly style="background: rgba(0,0,0,0.05); cursor: not-allowed;">
+      </div>
+      <!-- Mật khẩu -->
+      <div class="form-group">
+        <label for="confPass">Mật khẩu <span class="req">*</span></label>
+        <input type="text" id="confPass" required>
+      </div>
+      <!-- Hạn dùng -->
+      <div class="form-group">
+        <label for="confExpiry">Hạn dùng <span class="req">*</span></label>
+        <input type="date" id="confExpiry" required>
+      </div>
+      <!-- Số điện thoại -->
+      <div class="form-group">
+        <label for="confPhone">Số điện thoại <span class="req">*</span></label>
+        <input type="tel" id="confPhone" required>
+      </div>
+      <!-- Email -->
+      <div class="form-group">
+        <label for="confEmail">Email <span class="req">*</span></label>
+        <input type="email" id="confEmail" required>
+      </div>
+      <!-- Giấy tờ định danh -->
+      <div class="form-group">
+        <label for="confIdNum">Giấy tờ định danh (CCCD/CMND) <span class="req">*</span></label>
+        <input type="text" id="confIdNum" required>
+      </div>
+      <!-- Ngày sinh -->
+      <div class="form-group">
+        <label for="confDob">Ngày sinh <span class="req">*</span></label>
+        <input type="date" id="confDob" required>
+      </div>
+      
+      <!-- Student only fields -->
+      <div id="confStudentOnly">
+        <div class="form-group">
+          <label for="confCourse">Khóa học / Mã lớp <span class="req">*</span></label>
+          <input type="text" id="confCourse">
+        </div>
+        <div class="form-group">
+          <label for="confSchool">Tên trường <span class="req">*</span></label>
+          <input type="text" id="confSchool">
+        </div>
+        <div class="form-group">
+          <label for="confSvExpiry">Hạn thẻ HS/SV (MM/YYYY) <span class="req">*</span></label>
+          <input type="month" id="confSvExpiry" placeholder="MM/YYYY">
+        </div>
+      </div>
+      
+      <button type="submit" class="btn-submit">Hoàn tất & Truy cập</button>
+    </form>
+  </div>
+
+  <script>
+    const DASH_MAP = {
+      'student': 'dashboard.html',
+      'teacher': 'dashboard.html',
+      'admin': 'admin-dashboard.html'
+    };
+
+    function toDisplayDate(d) {
+      if (!d) return '';
+      if (d.includes('-')) {
+        let parts = d.split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return d;
+    }
+    function toInputDate(d) {
+      if (!d) return '';
+      if (d.includes('/')) {
+        let parts = d.split('/');
+        if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+      return d;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const username = sessionStorage.getItem('username');
+      if (!username) {
+        window.location.href = 'auth.html';
+        return;
+      }
+
+      const usersDb = JSON.parse(localStorage.getItem('users_db')) || [];
+      const user = usersDb.find(u => u.user === username);
+
+      if (!user) {
+        window.location.href = 'auth.html';
+        return;
+      }
+
+      // Populate form
+      document.getElementById('confName').value = user.name || '';
+      document.getElementById('confUser').value = user.user || '';
+      document.getElementById('confPass').value = user.pass || '';
+      document.getElementById('confExpiry').value = user.expiry || '';
+      document.getElementById('confPhone').value = user.phone || '';
+      document.getElementById('confEmail').value = user.email || '';
+      document.getElementById('confIdNum').value = user.idNum || '';
+      document.getElementById('confDob').value = toInputDate(user.dob);
+      
+      const sDiv = document.getElementById('confStudentOnly');
+      if (user.role === 'student') {
+        sDiv.style.display = 'block';
+        document.getElementById('confCourse').value = user.course || '';
+        document.getElementById('confSchool').value = user.school || '';
+        document.getElementById('confSvExpiry').value = user.svExpiry || '';
+        document.getElementById('confCourse').required = true;
+        document.getElementById('confSchool').required = true;
+        document.getElementById('confSvExpiry').required = true;
+      } else {
+        sDiv.style.display = 'none';
+        document.getElementById('confCourse').required = false;
+        document.getElementById('confSchool').required = false;
+        document.getElementById('confSvExpiry').required = false;
+      }
+
+      document.getElementById('confirmForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        user.name = document.getElementById('confName').value.trim();
+        user.pass = document.getElementById('confPass').value.trim();
+        user.expiry = document.getElementById('confExpiry').value;
+        user.phone = document.getElementById('confPhone').value.trim();
+        user.email = document.getElementById('confEmail').value.trim();
+        user.idNum = document.getElementById('confIdNum').value.trim();
+        user.dob = toDisplayDate(document.getElementById('confDob').value);
+        
+        if (user.role === 'student') {
+          user.course = document.getElementById('confCourse').value.trim();
+          user.school = document.getElementById('confSchool').value.trim();
+          user.svExpiry = document.getElementById('confSvExpiry').value;
+        }
+
+        user.needsConfirmation = false;
+        localStorage.setItem('users_db', JSON.stringify(usersDb));
+        
+        sessionStorage.removeItem('needsConfirmation');
+        sessionStorage.setItem('status', user.status);
+        sessionStorage.setItem('name', user.name);
+        
+        alert('Cập nhật thông tin thành công!');
+        window.location.href = DASH_MAP[user.role] || 'Index.html';
+      });
+    });
+  </script>
+</body>
+</html>

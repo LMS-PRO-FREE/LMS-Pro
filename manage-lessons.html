@@ -1,0 +1,414 @@
+﻿﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qu?n l� b�i h?c � Admin � LMS EDU PRO</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* -- Page Header -- */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-header-right {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* -- Table Wrapper -- */
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-shadow);
+      padding: 1px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+      font-size: 0.9rem;
+      border-radius: calc(var(--radius) - 1px);
+      overflow: hidden;
+    }
+    .data-table th,
+    .data-table td {
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding: 1rem;
+      text-align: left;
+      color: var(--text);
+    }
+    .data-table th {
+      background: rgba(255,255,255,0.25);
+      font-weight: 700;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .data-table tbody tr { transition: background var(--transition); }
+    .data-table tbody tr:hover { background: rgba(255,255,255,0.25); }
+
+    /* -- Primary Action Button -- */
+    .btn-primary-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), #005ecb);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 0.7rem 1.4rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.35);
+      transition: all var(--transition);
+    }
+    .btn-primary-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,122,255,0.45);
+    }
+
+    /* -- Small Table Action Buttons -- */
+    .btn-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: none;
+      border-radius: 12px;
+      padding: 5px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-sm-primary {
+      background: linear-gradient(135deg, var(--primary), #005ecb);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+    }
+    .btn-sm-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,122,255,0.4); }
+
+    /* -- Status Badges -- */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 20px;
+      padding: 0.22rem 0.8rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-public {
+      background: rgba(52,199,89,0.15);
+      color: var(--secondary);
+      border: 1px solid rgba(52,199,89,0.3);
+    }
+    .badge-draft {
+      background: rgba(255,149,0,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(255,149,0,0.3);
+    }
+    .badge-format {
+      background: rgba(0,122,255,0.1);
+      color: var(--primary);
+      border: 1px solid rgba(0,122,255,0.2);
+    }
+
+    /* -- Scrollbar hide -- */
+    ::-webkit-scrollbar { display: none; }
+    body, .table-responsive, .dashboard-sidebar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-sync.js"></script>
+</head>
+<body data-theme="light">
+  <header class="navbar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="Index.html" class="nav-logo"><span class="logo-text">LMS EDU PRO</span></a>
+    </div>
+    <nav class="nav-right" id="navRight">
+      <a href="Index.html" class="nav-link">Trang chủ</a>
+      <a href="about-us.html" class="nav-link">V➕ ch�ng t�i</a>
+      <a href="courses.html" class="nav-link">Chuong tr�nh h?c</a>
+      <a href="contact.html" class="nav-link">Li�n h?</a>
+      <a href="admin-community.html" class="nav-link nav-community">Cộng đồng</a>
+      <a href="admin-dashboard.html" class="nav-link nav-dashboard active">Bảng điều khiển</a>
+      <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+      <a href="auth.html" class="btn-auth-login">�ang nh?p / �ang k�</a>
+      <a href="#" class="btn-auth-logout">�ang xu?t</a>
+    </nav>
+    <button class="nav-hamburger" id="navHamburger"><span></span><span></span><span></span></button>
+  </header>
+  <nav class="nav-mobile-menu" id="navMobileMenu">
+    <a href="Index.html" class="nav-link">Trang chủ</a>
+    <a href="about-us.html" class="nav-link">V➕ ch�ng t�i</a>
+    <a href="courses.html" class="nav-link">Chuong tr�nh h?c</a>
+    <a href="contact.html" class="nav-link">Li�n h?</a>
+    <a href="admin-community.html" class="nav-link nav-community">Cộng đồng</a>
+    <a href="admin-dashboard.html" class="nav-link nav-dashboard active">Bảng điều khiển</a>
+    <a href="#" class="nav-avatar"><div class="avatar-circle">U</div><span class="avatar-name">User</span></a>
+    <a href="auth.html" class="btn-auth-login">�ang nh?p / �ang k�</a>
+    <a href="#" class="btn-auth-logout">�ang xu?t</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar" id="dynamicSidebar"></aside>
+    <script>
+      (function(){
+        const role = sessionStorage.getItem('role') || 'admin';
+        const sidebar = document.getElementById('dynamicSidebar');
+        if (role === 'teacher') {
+          sidebar.innerHTML = `
+            <h2>Gi�o vi�n</h2>
+            <a href="manage-lessons.html">?➕ Qu?n l� b�i h?c</a>
+            <a href="manage-classes.html">?➕ Qu?n l� l?p h?c</a>
+            <a href="profile.html">?➕ Th�ng tin c� nh�n</a>
+            <a href="settings.html">?➕ C�i d?t</a>
+            <a href="community.html">?➕ Cộng đồng</a>
+          `;
+        } else {
+          sidebar.innerHTML = `
+            <h2>Qu?n l�</h2>
+            <a href="admin-dashboard.html">?➕ Qu?n l� ngu?i d�ng</a>
+            <a href="manage-classes.html">?➕ Qu?n l� l?p h?c</a>
+            <a href="manage-lessons.html">?➕ Qu?n l� b�i h?c</a>
+            <a href="profile.html">?➕ Th�ng tin c� nh�n</a>
+            <a href="settings.html">?➕ C�i d?t</a>
+            <a href="payment-history.html">?➕ L?ch s➕ thanh to�n</a>
+            <a href="community.html">?➕ Cộng đồng</a>
+          `;
+        }
+        const currentPath = window.location.pathname.split('/').pop() || 'manage-lessons.html';
+        sidebar.querySelectorAll('a').forEach(a => {
+          if (a.getAttribute('href') === currentPath) {
+            a.classList.add('active');
+          } else {
+            a.classList.remove('active');
+          }
+        });
+      })();
+    </script>
+
+    <main class="dashboard-main">
+      <div class="page-header">
+        <div class="page-header-left">
+          <button onclick="window.location.href='manage-classes.html'" style="background:var(--glass-bg); border:1px solid var(--border); font-size:1.2rem; cursor:pointer; color:var(--text); display:flex; align-items:center; justify-content:center; width:35px; height:35px; border-radius:50%; box-shadow:var(--glass-shadow); transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" aria-label="Quay lại">🔙</button>
+          <h1 class="page-title">Qu?n l� b�i h?c</h1>
+        </div>
+        <div class="page-header-right">
+          <button class="btn-primary-action" onclick="openLessonModal()">
+            <span>?</span> Th�m b�i h?c
+          </button>
+        </div>
+      </div>
+      <p class="page-subtitle">Danh s�ch t?t c➕ b�i gi?ng v� t�i li?u tr�n h➕ th?ng.</p>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>T�n b�i h?c</th>
+              <th>Kh�a h?c</th>
+              <th>�?nh d?ng</th>
+              <th>Lượt xem</th>
+              <th>Tr?ng th�i</th>
+              <th>Thao t�c</th>
+            </tr>
+          </thead>
+          <tbody id="lessonsTableBody">
+            <!-- Render via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>LMS EDU PRO</h3><p>N?n t?ng h?c t?p tr?c tuy?n chuy�n nghi?p.</p></div>
+      <div class="footer-col"><h3>Li�n k?t nhanh</h3><a href="about-us.html">V➕ ch�ng t�i</a><a href="courses.html">Chuong tr�nh h?c</a><a href="contact.html">Li�n h?</a></div>
+      <div class="footer-col"><h3>Li�n h?</h3><p>Email: support@lmsedupro.vn</p></div>
+    </div>
+    <div class="footer-bottom">� 2026 LMS EDU PRO. All rights reserved.</div>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    
+      let lessonList = JSON.parse(localStorage.getItem('lessons_db'));
+      if (!lessonList) {
+        lessonList = [
+          { id: "BH-001", name: "Unit 1: Introduction to IELTS", teacherUser: "GV01", course: "IELTS Preparation", format: "Video + PDF", views: "1,245", status: "Công khai" },
+          { id: "BH-002", name: "Unit 2: IELTS Reading Strategies", teacherUser: "GV02", course: "IELTS Preparation", format: "Video + Quiz", views: "890", status: "Công khai" },
+          { id: "BH-003", name: "Unit 1: Toeic Listening Part 1", teacherUser: "GV01", course: "TOEIC Intensive", format: "Audio + PDF", views: "2,100", status: "Bản nháp" }
+        ];
+        localStorage.setItem('lessons_db', JSON.stringify(lessonList));
+      }
+
+
+    function renderLessons() {
+      const role = sessionStorage.getItem('role') || 'admin';
+      const username = sessionStorage.getItem('username');
+      const tbody = document.getElementById('lessonsTableBody');
+      tbody.innerHTML = '';
+
+      lessonList.forEach(l => {
+        if (role === 'teacher' && l.teacherUser !== username) return;
+
+        const isPublic = l.status === 'C�ng khai';
+        const statusBadge = isPublic
+          ➕ `<span class="badge badge-public">➕ ${l.status}</span>`
+          : `<span class="badge badge-draft">?➕ ${l.status}</span>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-weight:700; color:var(--primary); font-size:0.85rem;">${l.id}</span></td>
+          <td><strong>${l.name}</strong></td>
+          <td style="color:var(--text-muted);">${l.course}</td>
+          <td><span class="badge badge-format">${l.format}</span></td>
+          <td style="font-weight:600;">${l.views}</td>
+          <td>${statusBadge}</td>
+          <td><button class="btn-sm btn-sm-primary" onclick="openLessonModal('${l.id}')">✏️ Sửa</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    
+      function openLessonModal(id = null) {
+        document.getElementById('lessonForm').reset();
+        document.getElementById('lessonId').value = '';
+        document.getElementById('lessonModalTitle').textContent = 'Thêm Bài Học Mới';
+        
+        if (id) {
+          const l = lessonList.find(x => x.id === id);
+          if (l) {
+            document.getElementById('lessonModalTitle').textContent = 'Sửa Bài Học';
+            document.getElementById('lessonId').value = l.id;
+            document.getElementById('lessonName').value = l.name;
+            document.getElementById('lessonCourse').value = l.course;
+            document.getElementById('lessonFormat').value = l.format;
+            document.getElementById('lessonStatus').value = l.status;
+          }
+        }
+        document.getElementById('lessonModalOverlay').classList.add('active');
+      }
+
+      document.getElementById('lessonForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('lessonId').value;
+        const name = document.getElementById('lessonName').value;
+        const course = document.getElementById('lessonCourse').value;
+        const format = document.getElementById('lessonFormat').value;
+        const status = document.getElementById('lessonStatus').value;
+        const username = sessionStorage.getItem('username') || 'GV01';
+
+        if (id) {
+          const idx = lessonList.findIndex(x => x.id === id);
+          if (idx > -1) {
+            lessonList[idx].name = name;
+            lessonList[idx].course = course;
+            lessonList[idx].format = format;
+            lessonList[idx].status = status;
+          }
+        } else {
+          const newId = 'BH-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          lessonList.unshift({
+            id: newId, name, teacherUser: username, course, format, views: "0", status
+          });
+        }
+
+        localStorage.setItem('lessons_db', JSON.stringify(lessonList));
+        renderLessons();
+        document.getElementById('lessonModalOverlay').classList.remove('active');
+        if (window.customAlert) customAlert('Lưu bài học thành công!');
+        else alert('Lưu bài học thành công!');
+      });
+
+      document.addEventListener('DOMContentLoaded', renderLessons);
+  </script>
+
+<!-- Lesson Modal -->
+<div id="lessonModalOverlay" class="custom-modal-overlay">
+  <div class="custom-modal-box" style="max-width: 500px;">
+    <div class="custom-modal-title" id="lessonModalTitle">Thêm Bài Học Mới</div>
+    <form id="lessonForm">
+      <input type="hidden" id="lessonId">
+      <div style="text-align: left; margin-bottom: 1rem;">
+        <label for="lessonName" style="display:block; margin-bottom:0.5rem; font-weight:bold;">Tên bài học</label>
+        <input type="text" id="lessonName" required style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid #ccc;">
+      </div>
+      <div style="text-align: left; margin-bottom: 1rem;">
+        <label for="lessonCourse" style="display:block; margin-bottom:0.5rem; font-weight:bold;">Khóa học</label>
+        <input type="text" id="lessonCourse" required style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid #ccc;">
+      </div>
+      <div style="text-align: left; margin-bottom: 1rem;">
+        <label for="lessonFormat" style="display:block; margin-bottom:0.5rem; font-weight:bold;">Định dạng (Format)</label>
+        <select id="lessonFormat" style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid #ccc;">
+          <option value="Video + PDF">Video + PDF</option>
+          <option value="Audio + PDF">Audio + PDF</option>
+          <option value="Video + Quiz">Video + Quiz</option>
+        </select>
+      </div>
+      <div style="text-align: left; margin-bottom: 1rem;">
+        <label for="lessonFile" style="display:block; margin-bottom:0.5rem; font-weight:bold;">Upload Tài nguyên (Video/PDF)</label>
+        <input type="file" id="lessonFile" style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid #ccc; background: rgba(0,0,0,0.05);">
+        <small style="color:var(--text-muted); display:block; margin-top:0.25rem;">Hỗ trợ file dung lượng lớn (Max 5GB)</small>
+      </div>
+      <div style="text-align: left; margin-bottom: 2rem;">
+        <label for="lessonStatus" style="display:block; margin-bottom:0.5rem; font-weight:bold;">Trạng thái</label>
+        <select id="lessonStatus" style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid #ccc;">
+          <option value="Công khai">Công khai</option>
+          <option value="Bản nháp">Bản nháp</option>
+        </select>
+      </div>
+      <div class="custom-modal-actions">
+        <button type="button" class="btn-custom-modal btn-custom-cancel" onclick="document.getElementById('lessonModalOverlay').classList.remove('active')">Hủy</button>
+        <button type="submit" class="btn-custom-modal">Lưu bài học</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>
+
+
